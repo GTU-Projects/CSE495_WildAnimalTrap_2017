@@ -4,14 +4,22 @@ import time
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
-
-class DCmotor():
-    def __init__(self, pin1, pin2):
+class DCMotor():
+    def __init__(self, pin1, pin2,pinPWM=None, pwmFreq=None,dutyCycle=None):
         self.pin1=pin1
         self.pin2=pin2
+        
+        self.isPWMOpen=False
 
         GPIO.setup(self.pin1,GPIO.OUT)
         GPIO.setup(self.pin2,GPIO.OUT)
+
+        if pinPWM!=None:
+            self.pinPWM=pinPWM
+            GPIO.setup(self.pinPWM,GPIO.OUT)
+            self.pwm = GPIO.PWM(self.pinPWM,pwmFreq)
+            self.pwm.start(dutyCycle)
+            self.isPWMOpen=True
 
     def turnLeft(self):
         GPIO.output(self.pin1,1)
@@ -24,21 +32,25 @@ class DCmotor():
     def stop(self):
         GPIO.output(self.pin1,0)
         GPIO.output(self.pin2,0)
+        
+        if isPWMOpen:
+            GPIO.output(self.pinPWM,0)
+            self.pwm.stop()
 
-    def turnLeftWithPWM(self,risingTime,follingTime):
+    def turnLeftWithDelays(self,risingTime,follingTime):
         GPIO.output(self.pin1,1)
         GPIO.output(self.pin2,0)
         time.sleep(risingTime)
         GPIO.output(self.pin1,0)
         time.sleep(follingTime)
 
-    def turnRightWithPWM(self,risingTime,follingTime):
+    def turnRightWithDelays(self,risingTime,follingTime):
         GPIO.output(self.pin1,0)
         GPIO.output(self.pin2,1)
         time.sleep(risingTime)
         GPIO.output(self.pin2,0)
         time.sleep(follingTime)
-
+        
     def _test(self):
         print("Starting DC motor tests")
         print("Will turn 5 times right and left and each turn will take 2 sec")
@@ -50,22 +62,20 @@ class DCmotor():
             time.sleep(2)
         self.stop()
 
-    def _testPWM(self):
+    def _testTurnWithDelay(self):
         for i in range(0,10):
-            self.turnLeftWithPWM(0.05,0.2)
+            self.turnLeftWithDelay(0.05,0.2)
         for i in range(0,10):
-            self.turnRightWithPWM(0.05,0.2)
+            self.turnRightWithDelay(0.05,0.2)
 
         self.stop()
         print("DC motor tests done. Did you see movements?")
 
 def dcMotorModuleTest():
-    dcMotor = DCmotor(20,21)
+    dcMotor = DCMotor(20,21,4,200,15)
+
     print("FirstTest")
     dcMotor._test()
-    time.sleep(1)
-    print("SecondTest")
-    dcMotor._testPWM()
-
+    
 if __name__=="__main__":
     dcMotorModuleTest()
