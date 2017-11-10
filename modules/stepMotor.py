@@ -93,8 +93,10 @@ class MB11_stepper():
         print("Test done! Did you see movements?")
 
 
+def stepMotorModuleTest():
+    stepMotor = MB11_stepper(gBottom=6,yBottom=13,gTop=19,yTop=26)
+    stepMotor._test()
 
-stepMotor = MB11_stepper(gBottom=6,yBottom=13,gTop=19,yTop=26)
 
-stepMotor._test()
-    
+ if __name__=="__main__":
+    stepMotorModuleTest()
