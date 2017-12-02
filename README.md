@@ -8,10 +8,12 @@
     * 1 Raspberry Pi3
     * 1 Raspberry Pi Camera or USB camera
     * 1 GPRS/GSM Module
-    * 1 Step motor (Phlips MB1)
+    * 1 Step motor (Phlips MB11)
     * 1 DC motor
     * 2 Motor driver (L298N)
+    * 1 Motion sensor (HC-SR501)
     * 1 Weight sensor and amplifer
+    * 1 Breadbord and many jumper cables
 * Software
     * Raspberry
         * Python3
