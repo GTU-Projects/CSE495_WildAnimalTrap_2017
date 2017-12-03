@@ -41,17 +41,18 @@ def request_loader(request):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if flask.request.method == 'POST':
+        
         email = flask.request.form['email']
         password = flask.request.form['password']
-
+        
         if email == "" or password == "":
-            return flask.render_template('login.html', error = "EMPTY USERNAME OR PASSWORD")
+            return flask.render_template('login.html', error = "Empty E-Mail or Password")
 
         email = email.replace("\'","").replace("\"","")
         password = password.replace("\'","").replace("\"","")
 
         if email not in users:
-            return flask.render_template('login.html', error = "INVALID USERNAME OR PASSWORD")
+            return flask.render_template('login.html', error = "Invalid E-Mail or Password",info=False)
 
         if flask.request.form['password'] == users[email]['password']:
             user = User()
@@ -59,24 +60,24 @@ def login():
             flask_login.login_user(user)
             return flask.redirect(flask.url_for('home'))
         else:
-            return flask.render_template('login.html', error = "INVALID USERNAME OR PASSWORD")
+            return flask.render_template('login.html', error = "Invalid E-Mail or Password")
 
-    return flask.render_template('login.html', error = False)
+    return flask.render_template('login.html', error = False, info=False)
 
 
 @app.route('/logout')
 def logout():
     flask_login.logout_user()
-    return 'Logged out'
+    return flask.render_template("login.html",error=False, info="Logout Successful")
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
-    return 'Unauthorized'
+    return flask.render_template("login.html",error=False, info="Please Login First")
 
 @app.route('/home')
 @flask_login.login_required
 def home():
-    return 'Logged in as: ' + flask_login.current_user.id
+    return flask.render_template("home.html")
 
 @app.route("/")
 def root():
