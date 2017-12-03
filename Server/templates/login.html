@@ -19,7 +19,7 @@
 		</div>
 		<div class="row">
 			<div class="col-md-offset-4 col-md-4">
-				<form  method="POST">
+				<form  action="login" method="POST">
 					<div class="form-group">
 						<label for="email">Email address:</label>
 						<input type="email" class="form-control" name="email">
@@ -31,7 +31,7 @@
 					<div class="checkbox">
 						<label><input type="checkbox"> Remember me</label>
 					</div>
-					<button type="submit" onclick="login()" class="btn btn-success col-md-12">Login</button>
+					<button type="submit" class="btn btn-success col-md-12">Login</button>
 				</form>
 				<br><br>
 				{% if error %}
