@@ -1,0 +1,56 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Login</title>
+		<meta charset="UTF-8">
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<link href="../static/login.css" rel="stylesheet">
+	</head>
+<body>
+	<div class="container login-area">
+		<div class="row">
+			<div class="col-md-offset-4 col-md-4">
+				<img class="login-logo col-md-offset-2" src="../static/logo.PNG" alt="GTU-LOGO" >
+				<div class="page-header">
+						<h4 class="text-center">Wild Animal Trap - CSE 495</h4>
+					</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-offset-4 col-md-4">
+				<form  method="POST">
+					<div class="form-group">
+						<label for="email">Email address:</label>
+						<input type="email" class="form-control" name="email">
+					</div>
+					<div class="form-group">
+						<label for="pwd">Password:</label>
+						<input type="password" class="form-control" name="password">
+					</div>
+					<div class="checkbox">
+						<label><input type="checkbox"> Remember me</label>
+					</div>
+					<button type="submit" onclick="login()" class="btn btn-success col-md-12">Login</button>
+				</form>
+				<br><br>
+				{% if error %}
+					<div class="alert alert-danger" roler="alert">
+						<strong>Error:</strong> {{ error }}
+					</div>
+				{% endif %}	
+				{% if info %}
+				<div class="alert alert-info" roler="alert">
+					<strong>Info:</strong> {{ info }}
+				</div>
+			{% endif %}			
+			</div>
+		</div>
+	</div>
+	<!-- jQuery library -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	
+	<!-- Latest compiled JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> 
+</body>
+</html>
