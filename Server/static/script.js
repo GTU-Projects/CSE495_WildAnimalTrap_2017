@@ -7,8 +7,8 @@ trapApp.config(function($routeProvider) {
     $routeProvider
         // route for the home page
         .when('/', {
-            templateUrl : '/static/partials/home.html',
-            controller  : 'mainController'
+            templateUrl : '/static/partials/traps.html',
+            controller  : 'trapsController'
         })
 
         // route for the about page
@@ -22,13 +22,12 @@ trapApp.config(function($routeProvider) {
             templateUrl : '/static/partials/traps.html',
             controller  : 'trapsController'
         })
-});
 
-
-// create the controller and inject Angular's $scope
-trapApp.controller('mainController', function($scope) {
-    // create a message to display in our view
-    $scope.message = 'Home2 Page';
+        // route for the traps page
+        .when('/trap-detail', {
+            templateUrl : '/static/partials/trap-detail.html',
+            controller  : 'trapDetailController'
+        })
 });
 
 trapApp.controller('aboutController', function($scope) {
@@ -37,6 +36,11 @@ trapApp.controller('aboutController', function($scope) {
 
 trapApp.controller('trapsController', function($scope) {
     $scope.message = 'Trap1 trap2 ...';
+});
+
+trapApp.controller('trapDetailController', function($scope) {
+    $scope.location = 'GTU';
+    $scope.status = 'Offline';
 });
 
 
