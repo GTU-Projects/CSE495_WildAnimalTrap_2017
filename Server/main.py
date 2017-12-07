@@ -3,7 +3,7 @@ import flask_login
 
 # create and config flask app
 app = flask.Flask(__name__)
-app.config["DEBUG"]=True
+#app.config["DEBUG"]=True
 app.config["SECRET_KEY"]="HM_GTU_CSE495"
 
 
@@ -40,6 +40,7 @@ def request_loader(request):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    
     if flask.request.method == 'POST':
         
         email = flask.request.form['email']
@@ -58,30 +59,27 @@ def login():
             user = User()
             user.id = email
             flask_login.login_user(user)
-            return flask.redirect(flask.url_for('home'))
+            return flask.render_template("index.html")
         else:
             return flask.render_template('login.html', error = "Invalid E-Mail or Password")
 
     return flask.render_template('login.html', error = False, info=False)
 
-
 @app.route('/logout')
+@flask_login.login_required
 def logout():
     flask_login.logout_user()
-    return flask.render_template("login.html",error=False, info="Logout Successful")
+    return flask.render_template("login.html",error = False, info="Logout successful")
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
-    return flask.render_template("login.html",error=False, info="Please Login First")
+    return flask.redirect("login")
 
-@app.route('/home')
+@app.route('/',methods=["GET"])
 @flask_login.login_required
-def home():
-    return flask.render_template("home.html")
-
-@app.route("/")
 def root():
-    return flask.redirect(flask.url_for("login"))
+    return flask.render_template("index.html")
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
