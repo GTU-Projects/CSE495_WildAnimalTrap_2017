@@ -7,21 +7,29 @@ class ClientConnHelper():
 
     def connect(self,ip,port):
         try:
-            self.isConnected
+            
+            self.ip=ip
+            self.port=port
             self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-            self.sock.connect((socket.gethostname(),port))
-            print("connected")
+            # TODO: look this line
+            self.sock.connect((socket.gethostname(self.ip),self.port))
+            self.isConnected=True
         except Exception as e:
-            print("error"+str(e))
+            return self.isConnected
 
     def sendMsg(self,str):
-        
         try:
-            self.sock.send("test".encode())
+            self.sock.send(str.encode())
             return True
         except Exception as e:
-            print(str(e))
             return False
+
+    def reConnect(self):
+        try:
+            self.sock.connect((socket.gethostbyname(self.ip),self.port))
+            self.isConnected=True
+        except:
+            return self.isConnected
 
 if __name__=="__main__":
     conn = ClientConnHelper()

@@ -39,8 +39,8 @@ trapApp.controller('trapsController', function($scope) {
 });
 
 trapApp.controller('trapDetailController', function($scope) {
-    $scope.location = 'GTU';
-    $scope.status = 'Offline';
+    $scope.location = '{40.8090457,29.3644636}';
+    $scope.status = 'Online';
 });
 
 
