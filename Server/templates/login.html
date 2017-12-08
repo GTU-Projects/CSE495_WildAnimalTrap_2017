@@ -5,21 +5,21 @@
 		<meta charset="UTF-8">
 		<!-- Latest compiled and minified CSS -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-		<link href="../static/login.css" rel="stylesheet">
+		<link href="/static/login.css" rel="stylesheet">
 	</head>
 <body>
 	<div class="container login-area">
-		<div class="row">
+		<div class="row" id="header-area">
 			<div class="col-md-offset-4 col-md-4">
-				<img class="login-logo col-md-offset-2" src="../static/logo.PNG" alt="GTU-LOGO" >
+				<img class="login-logo col-md-offset-2" src="/static/logo.PNG" alt="GTU-LOGO" >
 				<div class="page-header">
 						<h4 class="text-center">Wild Animal Trap - CSE 495</h4>
 					</div>
 			</div>
 		</div>
-		<div class="row">
+		<div class="row" id="login-area">
 			<div class="col-md-offset-4 col-md-4">
-				<form  action="login" method="POST">
+				<form>
 					<div class="form-group">
 						<label for="email">Email address:</label>
 						<input type="email" class="form-control" name="email">
@@ -31,26 +31,54 @@
 					<div class="checkbox">
 						<label><input type="checkbox"> Remember me</label>
 					</div>
-					<button type="submit" class="btn btn-success col-md-12">Login</button>
 				</form>
+				<button id="btnSignIn" class="btn btn-success col-md-12">Login</button>
 				<br><br>
-				{% if error %}
-					<div class="alert alert-danger" roler="alert">
-						<strong>Error:</strong> {{ error }}
-					</div>
-				{% endif %}	
-				{% if info %}
-				<div class="alert alert-info" roler="alert">
-					<strong>Info:</strong> {{ info }}
-				</div>
-			{% endif %}			
+				<button class="btn btn-primary col-md-12" id="btnToggleSign">Create Account</button>
 			</div>
-		</div>
-	</div>
+		</div> <!-- login area -->
+
+		<div class="row" id="signup-area" >
+			<div class="col-md-offset-4 col-md-4">
+				<form>
+					<div class="form-group">
+						<label for="serial">Serial Number:</label>
+						<input type="text" class="form-control" name="serial">
+					</div>
+					<div class="form-group">
+						<label for="email">Email address:</label>
+						<input type="email" class="form-control" name="email">
+					</div>
+					<div class="form-group">
+						<label for="password">Password:</label>
+						<input type="password" class="form-control" name="password">
+					</div>
+					<div class="form-group">
+						<label for="password2">Password Again:</label>
+						<input type="password" class="form-control" name="password2">
+					</div>
+					<button id="btnSignUp" type="submit" class="btn btn-success col-md-12">Sign Up</button>
+				</form>
+			</div>
+		</div> <!-- signup-area -->
+
+		<br>
+		<div class="row" >
+			<div class="col-md-offset-4 col-md-6">
+				<div class="alert" id="msg-area" roler="alert">
+				</div>
+			</div>
+		</div><!-- message-are -->
+
+	</div> <!-- Container -->
+
 	<!-- jQuery library -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 	
 	<!-- Latest compiled JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> 
+
+	<!-- Login-Logout page js -->
+	<script src="/static/login.js"></script>
 </body>
 </html>

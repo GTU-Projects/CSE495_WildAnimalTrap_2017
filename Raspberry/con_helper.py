@@ -12,9 +12,11 @@ class ClientConnHelper():
             self.port=port
             self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
             # TODO: look this line
-            self.sock.connect((socket.gethostname(self.ip),self.port))
+            self.sock.connect((socket.gethostbyname(self.ip),self.port))
             self.isConnected=True
+            print("Connected")
         except Exception as e:
+            print("Connection Error:",str(e))
             return self.isConnected
 
     def sendMsg(self,str):
@@ -33,5 +35,5 @@ class ClientConnHelper():
 
 if __name__=="__main__":
     conn = ClientConnHelper()
-    conn.connect("0.0.0.0",5669)
+    conn.connect("138.197.121.142",5669)
     conn.sendMsg("HmTest".encode())
