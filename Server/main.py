@@ -2,17 +2,15 @@ import flask
 import flask_login
 import json
 import Constants
+from db import DBHelper
 
 # create and config flask app
 app = flask.Flask(__name__)
 #app.config["DEBUG"]=True
 app.config["SECRET_KEY"]="HM_GTU_CSE495"
 
-
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
-
-users = {"email":"hmen.56@gmail.com","password":"Hasan5669"}
 
 
 class User(flask_login.UserMixin):
@@ -23,6 +21,30 @@ class User(flask_login.UserMixin):
 def user_loader(email):
     return User(email)
 
+@app.route("/signup",methods=["GET","POST"])
+def sigup():
+    try:
+        data = flask.request.get_json()
+
+        serial = data["serial"]
+        email = data["email"]
+        password = data["password"]
+
+
+        retVal = DBHelper.checkAccount(serial,email)
+        # if serial used or not know, warn user
+        if retVal!=Constants.SUCCESS:
+            return flask.jsonify({"status":retVal})
+
+        # if creates return success otherwise return error
+        retVal = DBHelper.createAccount(serial,email,password)
+
+        return flask.jsonify({"status":retVal})
+    except Exception as e:
+        print("Exception:"+str(e))
+        return flask.jsonify({"status":Constants.ERROR_UNKNOWN})
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     
@@ -30,22 +52,20 @@ def login():
         if flask.request.method == 'POST':
             data = flask.request.get_json()
             
-            email = data["email"]
-            password = data["password"]
-            if email == "" or password == "":
-                return {"status":Constants.ERROR_EMPTY_EMAIL_PASS}
+            email = data["email"].replace("\'","").replace("\"","")
+            password = data["password"].replace("\'","").replace("\"","")
 
-            email = email.replace("\'","").replace("\"","")
-            password = password.replace("\'","").replace("\"","")
-
-            # TODO: add checkLogin
-            if  email == users["email"] and password==users['password']:
+            retVal = DBHelper.checkCredential(email,password)
+            # if email and password true
+            if retVal == Constants.SUCCESS:
                 user = User(email)
                 flask_login.login_user(user)
                 print("login success")
                 return  flask.jsonify({"status":Constants.SUCCESS})
-            else:
+            elif retVal == Constants.ERROR_WRONG_EMAIL_PASS: # invalid credentials
                 return  flask.jsonify({"status":Constants.ERROR_WRONG_EMAIL_PASS})
+            else: # unknwon server error
+                return flask.jsonify({"status":Constants.ERROR_UNKNOWN})
 
     except Exception as e:
         print("Exception:",str(e))

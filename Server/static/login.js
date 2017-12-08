@@ -1,10 +1,18 @@
 function assembleStatus(status){
     if(status==0){
         return true;
+    }else if(status==-1){
+        return "Unknown Server Error!";
     }else if(status==1){
-        return "Empty E-Mail or Password";
+        return "Empty E-Mail or Password!";
     }else if(status==2){
-        return "Invalid E-Mail or Password";
+        return "Invalid E-Mail or Password!";
+    }else if(status==3){
+        return "E-Mail Already Used!";
+    }else if(status==4){
+        return "Trap Already Initialized!";
+    }else if(status==5){
+        return "Invalid Serial Number!";
     }
 }
 
@@ -12,14 +20,23 @@ function assembleStatus(status){
 $( document ).ready(function() {
     $("#signup-area").hide();
 
-    $("#btnToggleSign").click(function(){
+    $(".btnToggleSign").click(function(){
         $("#signup-area").fadeToggle();
         $("#login-area").fadeToggle();
     });
     
     $("#btnSignIn").click(function(){
-        
-        sendData = {"email":"hmen.56@gmail.com", "password":"Hasan5669"}
+
+        email = $("#loginEmail").val()
+        password = $("#loginPassword").val()
+
+        if (email=="" || password==""){
+            $("#msgArea").removeClass("alert-success").addClass("alert-danger");
+            $("#msgArea").text("Empty E-Mail or Password!");
+            return False
+        }
+
+        sendData = {"email":email, "password":password}
         $.ajax({
             url: "login",
             type: "POST",
@@ -31,8 +48,8 @@ $( document ).ready(function() {
                 if(retVal==true){
                     $(location).attr('href','./');
                 }else{
-                    $("#msg-area").removeClass("alert-primary").addClass("alert-danger");
-                    $("#msg-area").text(retVal);
+                    $("#msgArea").removeClass("alert-success").addClass("alert-danger");
+                    $("#msgArea").text(retVal);
                 }
             }
         });
@@ -41,7 +58,43 @@ $( document ).ready(function() {
     
     
     $("#btnSignUp").click(function(){
-        alert("Signup");
+       serial = $("#upSerial").val();
+       email = $("#upEmail").val();
+       password = $("#upPassword").val();
+       password2 = $("#upPassword2").val();
+
+
+        if(serial=="" || email=="" || password=="" || password2==""){
+            $("#msgArea").addClass("alert-danger").text("Please Fill All Blanks!");
+            return false
+        }
+
+        if(password!=password2){
+            $("#msgArea").addClass("alert-danger").text("Passwords not same!");
+            return false
+        }
+
+
+        sendData = {"email":email, 
+                    "password":password,
+                    "serial":serial}
+        $.ajax({
+            url: "signup",
+            type: "POST",
+            data: JSON.stringify(sendData),
+            contentType: "application/json",
+            // data has status variable
+            success: function(data,status){
+                retVal = assembleStatus(data["status"]);
+                if(retVal==true){
+                    $("#msgArea").removeClass("alert-danger").addClass("alert-success");
+                    $("#msgArea").text("Account created. Now you can login");
+                }else{
+                    $("#msgArea").removeClass("alert-success").addClass("alert-danger");
+                    $("#msgArea").text(retVal);
+                }
+            }
+        });
     });
 
 });

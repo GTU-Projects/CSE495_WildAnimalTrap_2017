@@ -3,6 +3,7 @@
 	<head>
 		<title>Login</title>
 		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
 		<!-- Latest compiled and minified CSS -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 		<link href="/static/login.css" rel="stylesheet">
@@ -10,65 +11,62 @@
 <body>
 	<div class="container login-area">
 		<div class="row" id="header-area">
-			<div class="col-md-offset-4 col-md-4">
+			<div class="col-md-offset-4 col-sm-8 col-md-4">
 				<img class="login-logo col-md-offset-2" src="/static/logo.PNG" alt="GTU-LOGO" >
 				<div class="page-header">
-						<h4 class="text-center">Wild Animal Trap - CSE 495</h4>
-					</div>
+					<h4 class="text-center">Wild Animal Trap - CSE 495</h4>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-offset-4 col-sm-8 col-md-4">
+				<div class="alert" id="msgArea" roler="alert">
+				</div>
 			</div>
 		</div>
 		<div class="row" id="login-area">
-			<div class="col-md-offset-4 col-md-4">
+			<div class="col-md-offset-4 col-sm-8 col-md-4">
 				<form>
 					<div class="form-group">
 						<label for="email">Email address:</label>
-						<input type="email" class="form-control" name="email">
+						<input id="loginEmail" type="email" class="form-control">
 					</div>
 					<div class="form-group">
 						<label for="pwd">Password:</label>
-						<input type="password" class="form-control" name="password">
-					</div>
-					<div class="checkbox">
-						<label><input type="checkbox"> Remember me</label>
+						<input id="loginPassword" type="password" class="form-control">
 					</div>
 				</form>
-				<button id="btnSignIn" class="btn btn-success col-md-12">Login</button>
+				<button id="btnSignIn" class="btn btn-success col-sm-12 col-md-12">Login</button>
 				<br><br>
-				<button class="btn btn-primary col-md-12" id="btnToggleSign">Create Account</button>
+				<button class="btn btn-primary col-sm-12 col-md-12 btnToggleSign">Go Sign-Up Area</button>
 			</div>
 		</div> <!-- login area -->
 
 		<div class="row" id="signup-area" >
-			<div class="col-md-offset-4 col-md-4">
+			<div class="col-md-offset-4 col-sm-8 col-md-4">
 				<form>
 					<div class="form-group">
 						<label for="serial">Serial Number:</label>
-						<input type="text" class="form-control" name="serial">
+						<input id="upSerial" type="text" class="form-control">
 					</div>
 					<div class="form-group">
 						<label for="email">Email address:</label>
-						<input type="email" class="form-control" name="email">
+						<input id="upEmail" type="email" class="form-control">
 					</div>
 					<div class="form-group">
 						<label for="password">Password:</label>
-						<input type="password" class="form-control" name="password">
+						<input id="upPassword" type="password" class="form-control" >
 					</div>
 					<div class="form-group">
 						<label for="password2">Password Again:</label>
-						<input type="password" class="form-control" name="password2">
+						<input id="upPassword2" type="password" class="form-control">
 					</div>
-					<button id="btnSignUp" type="submit" class="btn btn-success col-md-12">Sign Up</button>
 				</form>
+				<button id="btnSignUp" class="btn btn-success col-sm-12 col-md-12">Sign-Up</button>
+				<br><br>
+				<button class="btn btn-primary col-sm-12 col-md-12 btnToggleSign">Go Sign-In Area</button>
 			</div>
 		</div> <!-- signup-area -->
-
-		<br>
-		<div class="row" >
-			<div class="col-md-offset-4 col-md-6">
-				<div class="alert" id="msg-area" roler="alert">
-				</div>
-			</div>
-		</div><!-- message-are -->
 
 	</div> <!-- Container -->
 
