@@ -1,69 +1,82 @@
 import flask
 import flask_login
+import json
+import Constants
+from db import DBHelper
 
 # create and config flask app
 app = flask.Flask(__name__)
 #app.config["DEBUG"]=True
 app.config["SECRET_KEY"]="HM_GTU_CSE495"
 
-
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
-users = {"hmen.56@gmail.com":{"password":"Hasan5669"}}
 
 class User(flask_login.UserMixin):
-    pass
+    def __init__(self,id):
+        self.id=id
+
+class Trap():
+    def __init__(self,serial,userId,location):
+        self.serial=serial
+        self.userId=userId
+        self.location=location
     
 @login_manager.user_loader
 def user_loader(email):
-    if email not in users:
-        return None
+    return User(email)
 
-    user = User()
-    user.id=email
-    return user
+@app.route("/signup",methods=["GET","POST"])
+def sigup():
+    try:
+        data = flask.request.get_json()
 
-@login_manager.request_loader
-def request_loader(request):
-    email = request.form.get("email")
-    if email not in users:
-        return None
+        serial = data["serial"]
+        email = data["email"]
+        password = data["password"]
 
-    user = User()
-    user.id = email
 
-    if request.form["password"] == users[email]["password"]:
-        user.is_authenticated = True
-    else:
-        user.is_authenticated = False
+        retVal = DBHelper.checkAccount(serial,email)
+        # if serial used or not know, warn user
+        if retVal!=Constants.SUCCESS:
+            return flask.jsonify({"status":retVal})
+
+        # if creates return success otherwise return error
+        retVal = DBHelper.createAccount(serial,email,password)
+
+        return flask.jsonify({"status":retVal})
+    except Exception as e:
+        print("Exception:"+str(e))
+        return flask.jsonify({"status":Constants.ERROR_UNKNOWN})
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     
-    if flask.request.method == 'POST':
-        
-        email = flask.request.form['email']
-        password = flask.request.form['password']
-        
-        if email == "" or password == "":
-            return flask.render_template('login.html', error = "Empty E-Mail or Password")
+    try:
+        if flask.request.method == 'POST':
+            data = flask.request.get_json()
+            
+            email = data["email"].replace("\'","").replace("\"","")
+            password = data["password"].replace("\'","").replace("\"","")
 
-        email = email.replace("\'","").replace("\"","")
-        password = password.replace("\'","").replace("\"","")
+            retVal = DBHelper.checkCredential(email,password)
+            # if email and password true
+            if retVal == Constants.SUCCESS:
+                user = User(email)
+                flask_login.login_user(user)
+                print("login success")
+                return  flask.jsonify({"status":Constants.SUCCESS})
+            elif retVal == Constants.ERROR_WRONG_EMAIL_PASS: # invalid credentials
+                return  flask.jsonify({"status":Constants.ERROR_WRONG_EMAIL_PASS})
+            else: # unknwon server error
+                return flask.jsonify({"status":Constants.ERROR_UNKNOWN})
 
-        if email not in users:
-            return flask.render_template('login.html', error = "Invalid E-Mail or Password",info=False)
+    except Exception as e:
+        print("Exception:",str(e))
 
-        if flask.request.form['password'] == users[email]['password']:
-            user = User()
-            user.id = email
-            flask_login.login_user(user)
-            return flask.render_template("index.html")
-        else:
-            return flask.render_template('login.html', error = "Invalid E-Mail or Password")
-
-    return flask.render_template('login.html', error = False, info=False)
+    return flask.render_template('login.html')
 
 @app.route('/logout')
 @flask_login.login_required
@@ -79,6 +92,20 @@ def unauthorized_handler():
 @flask_login.login_required
 def root():
     return flask.render_template("index.html")
+
+
+@app.route("/getTraps",methods=["POST"])
+@flask_login.login_required
+def getTraps():
+    trapsArray = Constants.SUCCESS
+    try:
+        trapsArray = DBHelper.getTraps(flask_login.current_user.id)
+        print("AllTraps:",trapsArray)
+    except Excetion as e:
+        print("GetTraps:",str(e))
+        trapsArray = Constants.ERROR_UNKNOWN
+
+    return flask.jsonify(trapsArray)
 
 
 if __name__ == "__main__":
