@@ -16,6 +16,12 @@ login_manager.init_app(app)
 class User(flask_login.UserMixin):
     def __init__(self,id):
         self.id=id
+
+class Trap():
+    def __init__(self,serial,userId,location):
+        self.serial=serial
+        self.userId=userId
+        self.location=location
     
 @login_manager.user_loader
 def user_loader(email):
@@ -86,6 +92,20 @@ def unauthorized_handler():
 @flask_login.login_required
 def root():
     return flask.render_template("index.html")
+
+
+@app.route("/getTraps",methods=["POST"])
+@flask_login.login_required
+def getTraps():
+    trapsArray = Constants.SUCCESS
+    try:
+        trapsArray = DBHelper.getTraps(flask_login.current_user.id)
+        print("AllTraps:",trapsArray)
+    except Excetion as e:
+        print("GetTraps:",str(e))
+        trapsArray = Constants.ERROR_UNKNOWN
+
+    return flask.jsonify(trapsArray)
 
 
 if __name__ == "__main__":

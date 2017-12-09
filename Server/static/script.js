@@ -30,17 +30,31 @@ trapApp.config(function($routeProvider) {
         })
 });
 
+
 trapApp.controller('aboutController', function($scope) {
     $scope.message = 'About Hasan Men ...';
 });
 
-trapApp.controller('trapsController', function($scope) {
-    $scope.message = 'Trap1 trap2 ...';
+activeTrapSerial = ""
+trapApp.controller('trapsController', function($scope,$http) {
+
+    // get traps from backend-db
+    $http.post('/getTraps').then(function(response){
+        $scope.traps =response.data;
+    });
+
+    $scope.showTrapDetail = function(serial){
+        activeTrapSerial = serial
+        $(location).attr('href',"/#!/trap-detail");
+    };
 });
 
 trapApp.controller('trapDetailController', function($scope) {
-    $scope.location = '{40.8090457,29.3644636}';
     $scope.status = 'Online';
+    $scope.name="x";
+    $scope.serial = activeTrapSerial;
+    $scope.location = "x";
+    
 });
 
 
