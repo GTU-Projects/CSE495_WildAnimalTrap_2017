@@ -1,6 +1,7 @@
 import socket
 import logging
 import time
+from client_thread import TrapServiceThread 
 
 logger = logging.getLogger("ConnectionHelper")
 logger.setLevel(logging.DEBUG)
@@ -22,38 +23,30 @@ class ServerConnHelper():
             self.sock.listen(self.MAX_LISTEN_LEN)
             logger.info("Connection opened.")
         except Exception as e:
-            print(str(e))
+            print("ServerConnHelper: openConnection:",str(e))
 
     def accept(self):
         while True:
             try:
                 # accept connection from outside
                 # addres => (ip,port)
-                (clientsocket,address) = self.sock.accept()
+                (clientsocket,ip) = self.sock.accept()
                 # save ip-socket pair
-                connections[address[0]]=clientsocket
-                logger.debug("Client[{}:{}] accepted.".format(address[0],address[1]))
+                connections[ip[0]]=clientsocket
 
-                self.read(address[0])
+                # create threads for each trap
+                clientThread = TrapServiceThread(ip,clientsocket)
+                clientThread.setDaemon(True)
+                clientThread.start()
 
             except Exception as e:
-                logger.error("Accept exception"+str(e))
-
-    def read(self,ip):
-        buffer = []
-        bytes_recv =0
-        try:
-            sock = connections[ip]
-            while True:
-                buffer = sock.recv(1024)
-                print("Read:",buffer.decode("UTF-8"))
-                time.sleep(1)
-        except Exception as e:
-            print("err"+str(e))
-
+                logger.error("AcceptException:"+str(e))
 
 if __name__=="__main__":
-    conn = ServerConnHelper()
-    conn.openConnection(5669)
-    conn.accept()
-    conn.read("127.0.0.1")
+    try:
+        conn = ServerConnHelper()
+        conn.openConnection(5669)
+        conn.accept()
+    except KeyboardInterrupt:
+        print("!! Ctrl + C !!!")
+        pass
