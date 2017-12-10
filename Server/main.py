@@ -107,12 +107,6 @@ def getTraps():
 
     return flask.jsonify(trapsArray)
 
-
-@app.route("/rpi-login",methods=["GET"])
-def rpiLogin():
-    print(flask.request.args)
-    return "Test"
-
-
 if __name__ == "__main__":
+    
     app.run(host="0.0.0.0", port=5000)
