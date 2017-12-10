@@ -1,5 +1,6 @@
 import socket
 import logging
+import time
 
 logger = logging.getLogger("ConnectionHelper")
 logger.setLevel(logging.DEBUG)
@@ -17,7 +18,7 @@ class ServerConnHelper():
     def openConnection(self,port):
         try:
             self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-            self.sock.bind((socket.gethostname(),port))
+            self.sock.bind((socket.gethostbyname("localhost"),port))
             self.sock.listen(self.MAX_LISTEN_LEN)
             logger.info("Connection opened.")
         except Exception as e:
@@ -43,8 +44,10 @@ class ServerConnHelper():
         bytes_recv =0
         try:
             sock = connections[ip]
-            buffer = sock.recv(1024)
-            print("Read:",buffer.decode("UTF-8"))
+            while True:
+                buffer = sock.recv(1024)
+                print("Read:",buffer.decode("UTF-8"))
+                time.sleep(1)
         except Exception as e:
             print("err"+str(e))
 

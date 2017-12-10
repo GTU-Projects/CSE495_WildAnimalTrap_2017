@@ -19,6 +19,35 @@ class GPRS_GSM():
 
         return self.isConnected
 
+    def sendCommand(self,cmd,delay):
+        self.conn.write(cmd.encode())
+        time.sleep(delay)
+        retVal = self.conn.read(100)
+        print("RetVal:",retVal)
+
+    def initAT(self):
+        self.sendCommand("AT\r",1)
+        self.sendCommand("ATE0\r",1)
+
+    def initTCPSocket(self,ip,port):
+        self.sendCommand("AT+CPIN?\r",1);
+        self.sendCommand("AT+CREG?\r",1);
+        self.sendCommand("AT+CGATT?\r",1);
+        self.sendCommand("AT+CIPSHUT\r",1);
+        self.sendCommand("AT+CIPSTATUS\r",1);
+        self.sendCommand("AT+CIPMUX=0\r",1);
+        self.sendCommand("AT+CSTT?\r",1);
+        self.sendCommand("AT+CSTT=\"vodafone\",\"\",\"\"\r",3);
+        self.sendCommand("AT+CIICR\r",3);
+        self.sendCommand("AT+CIFSR\r",1);
+        self.sendCommand("AT+CIPSTART=\"TCP\",\"{}\",\"{}\"\r".format(ip,port),1);
+
+    def send2Socket(self,data):
+        self.sendCommand("AT+CIPSEND\r",1)
+        self.sendCommand("{}\r".format(data),1)
+        self.conn.write(bytes([26]))
+
+
     def getRequest(self, url):
         try:
             self.conn.write("AT+CSQ".encode())
@@ -76,15 +105,15 @@ class GPRS_GSM():
         time.sleep(30)
         print("End of call")
 
-    def test(self):
-        self.conn.write("AT\r".encode())
-        time.sleep(0.1)
-        retVal = self.conn.readline()
-        print("text:",retVal.decode("UTF-8"))
 
 if __name__=="__main__":
     module  = GPRS_GSM("/dev/ttyAMA0",19200,1.0)
     module.connect()
+    module.initAT()
+    module.initTCPSocket("138.197.121.142","5669")
+    while True:
+        module.send2Socket("TESTMSG")
+        time.sleep(1)
+    
     #module.getRequest("www.google.com.tr")
     #module.makeCall("+05534912147")
-    module.test()
