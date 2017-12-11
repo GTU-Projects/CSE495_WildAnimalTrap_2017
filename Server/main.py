@@ -3,6 +3,8 @@ import flask_login
 import json
 import Constants
 from db import DBHelper
+import con_helper
+from client_thread import trapThreads
 
 # create and config flask app
 app = flask.Flask(__name__)
@@ -107,6 +109,51 @@ def getTraps():
 
     return flask.jsonify(trapsArray)
 
+@app.route("/setDoor",methods=["POST"])
+@flask_login.login_required
+def setDoor():
+    status = Constants.SUCCESS
+    try:
+        req = flask.request.get_json()
+        serial = req["serial"]
+        cmd = req["cmd"]
+
+        # 1 opendoor
+        # 2 closedoor
+        # 3 take photo
+        trapThreads["serial"].trapData.tQue.push(str(cmd))
+
+        retVal = trapThreads["serial"].trapData.rQue.pop()
+
+        if retVal:
+            print("Door state changed")
+        else:
+            print("Door state change error")
+
+
+    except Exception as e:
+        print("FlaskException: setDoor:",str(e))
+        status = Constants.ERROR_UNKNOWN
+
+    return flask.jsonify({"status":status})
+
+
+socketThread = None
+# you can access active trap connections with
+# trap = socketThread.connections[ipAddress]
+# trap.socket, trap.thread ...
+
 if __name__ == "__main__":
+    try:
+        # listen socket and create thread for each trap
+        # all trap communication will be served over connection helper
+        socketThread = con_helper.ServerConnHelperThread(5669)
+        socketThread.setDaemon(True)
+        socketThread.start()
+
+        app.run(host="0.0.0.0", port=5000)
+        
+    except KeyboardInterrupt:
+        socketThread.stop()
+
     
-    app.run(host="0.0.0.0", port=5000)
