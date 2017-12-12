@@ -1,6 +1,7 @@
 import threading
 import time
 import logging
+import queue
 
 
 logging.basicConfig(level=logging.DEBUG,
@@ -13,7 +14,7 @@ trapThreads = {}
 class ClientData():
     """ Store client socket, thread and ip address
     """
-    def __init__(self,ip,socket,thread, rQue, tQeu):
+    def __init__(self,ip,socket,thread, rQue, tQue):
         self.socket = socket
         self.thread = thread
         self.ip = ip
@@ -21,6 +22,7 @@ class ClientData():
         self.tQue = tQue
 
 class TrapServiceThread(threading.Thread):
+
     def __init__(self,ip,socket,rQue, tQue):
         threading.Thread.__init__(self)
         self.threadDoneFlag=False
@@ -33,39 +35,39 @@ class TrapServiceThread(threading.Thread):
 
     def run(self):
 
-        buffer = self.sock.recv(256).decode("UTF-8") # read serial number first
+        serial = self.trapData.socket.recv(256).decode("UTF-8") # read serial number first
+        
+        self.trapData.socket.send("A".encode()) # send acknowledge message to trap
+        print("Trap:",serial,"connected")
         # TODO: if serial is valid ...
 
-        trapThreads[buffer] = self.trapData
+        trapThreads[serial] = self.trapData
+        time.sleep(1)
         
         while not self.threadDoneFlag:
             try:
 
                 # read socket there is a incoming request otherwise send commands
                 # socket recv has 3 seconds timeout
-                buffer = self.trapData.sock.recv(256).decode("UTF-8") # read byte from socket
-                # decode buffer to UTF-8 to se human readable text
-                print("TrapServiceThread: Read:",buffer)
-            
-                if buffer.startswith('S-'):
-                    print("Trap Send Serial Number for connection")
-                    # TODO: set trap according to serial number
-                    #       match Serial-TrapIp address
+                buffer = None
+                try:
+                    buffer = self.trapData.socket.recv(10).decode("UTF-8") # read byte from socket
+                except Exception as e:
+                    buffer = None
+
+                # no coming request, send new user request to rpi if exist
+                if not buffer:
+                    # if queue is empty, will raise exception
+                    cmd = self.trapData.tQue.get_nowait()
+                    if cmd: 
+                        # send command to trap/rpi
+                        self.trapData.socket.sendall(cmd)
                 elif buffer == "A":
                     print("Trap Send Animal caught signal")
                 elif buffer.startswith('P-'):
                     print("Trap Send Photo Byte array")
-
-                ## push receive data to rQeu
-
-                else:
-                    # if empty throw empty exception and continue to recv operation
-                    cmd = self.trapData.tQue.get_nowait()
-                    
-                    # send command to trap/rpi
-                    self.trapData.soc.sendall(cmd)
-
-                
+            except queue.Empty:
+                pass
             except Exception as e:
                 print("TrapServiceThreadException:",str(e))
 
@@ -74,6 +76,8 @@ class TrapServiceThread(threading.Thread):
     def stop(self):
         while not self.threadDoneFlag:
             self.threadDoneFlag=True
+        self.trapData.socket.close()
+        print("Trap special socket closed")
         
 
 if __name__=="__main__":
