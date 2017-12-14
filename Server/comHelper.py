@@ -42,7 +42,6 @@ class ServerConnHelperThread(threading.Thread):
             self.sock.close()
 
     def run(self):
-
         # turn until connection/port open
         self.openConnection()
         while not self.isPortOpened and not self.threadDone:

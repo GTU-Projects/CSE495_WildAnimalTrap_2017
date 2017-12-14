@@ -1,20 +1,4 @@
-function assembleStatus(status){
-    if(status==0){
-        return true;
-    }else if(status==-1){
-        return "Unknown Server Error!";
-    }else if(status==1){
-        return "Empty E-Mail or Password!";
-    }else if(status==2){
-        return "Invalid E-Mail or Password!";
-    }else if(status==3){
-        return "E-Mail Already Used!";
-    }else if(status==4){
-        return "Trap Already Initialized!";
-    }else if(status==5){
-        return "Invalid Serial Number!";
-    }
-}
+
 
 
 $( document ).ready(function() {

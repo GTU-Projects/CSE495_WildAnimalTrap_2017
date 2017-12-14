@@ -4,7 +4,7 @@ from SocketInterface import SocketInterface
 
 
 class NetworkThread(threading.Thread):
-    def __init__(self,ip=138.197.121.142,port=5669,serial=95):
+    def __init__(self,ip="138.197.121.142",port="5669",serial=95):
         threading.Thread.__init__(self)
 
         self.sockInt = SocketInterface(ip,port)
