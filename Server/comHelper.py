@@ -3,7 +3,9 @@ import logging
 import time
 import threading
 import queue
+import Constants
 from client_thread import TrapServiceThread 
+from client_thread import trapThreads
 
 logger = logging.getLogger("ConnectionHelper")
 logger.setLevel(logging.DEBUG)
@@ -81,6 +83,16 @@ class ServerConnHelperThread(threading.Thread):
             self.isPortOpened=False
             print("ServerConnHelper: openConnection:",str(e))
         return self.isPortOpened
+
+    def sendReq2Trap(self,serial,reqConstant):
+        try:
+            print("SendReq2Trap:{serial},{const}".format(serial=serial,const=reqConstant))
+            if len(trapThreads)==0:
+                print("Trap not connected yet.")
+                return Constants.ERROR_CONNECTION
+            trapThreads[str(serial)].transmitQueue.put(str(reqConstant))
+        except Exception as e:
+            print("**Exception:",__file__," sendReq2Trap:",str(e))
 
 
 if __name__=="__main__":

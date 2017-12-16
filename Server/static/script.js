@@ -15,6 +15,8 @@ function assembleStatus(status){
         return "Trap Already Initialized!";
     }else if(status==5){
         return "Invalid Serial Number!";
+    }else if(status==6){
+        return "Trap Connection Error!";
     }
 }
 
@@ -55,7 +57,6 @@ trapApp.controller('aboutController', function($scope) {
 });
 
 
-activeTrapSerial = ""
 trapApp.controller('trapsController', function($scope,$http) {
 
     // get traps from backend-db
@@ -64,7 +65,7 @@ trapApp.controller('trapsController', function($scope,$http) {
     });
 
     $scope.showTrapDetail = function(serial){
-        activeTrapSerial = serial
+        document.cookie=serial;
         $(location).attr('href',"/#!/trap-detail");
     };
 });
@@ -72,10 +73,9 @@ trapApp.controller('trapsController', function($scope,$http) {
 trapApp.controller('trapDetailController', function($scope) {
     $scope.status = 'Online';
     $scope.name="x";
-    $scope.serial = activeTrapSerial;
+    $scope.serial = document.cookie;
     $scope.location = "x";
-
-
+    
     $scope.setDoor = function(nextState){
 
         sendData = {"serial":activeTrapSerial, "nextState":nextState}
@@ -118,7 +118,7 @@ trapApp.controller('trapDetailController', function($scope) {
                 if(retVal==true){
                     alert("take photo completed.");
                 }else{
-                    alert("take photo error!");
+                    alert(retVal);
                 }
             }
         });

@@ -6,13 +6,33 @@ from db import DBHelper
 import comHelper
 from client_thread import trapThreads
 
-# create and config flask app
-app = flask.Flask(__name__)
-#app.config["DEBUG"]=True
-app.config["SECRET_KEY"]="HM_GTU_CSE495"
+############### HEAD OF GLOBAL AREA - FLASK SETTINS ###############
+app = None
+login_manager = None
+socketThread = None
 
-login_manager = flask_login.LoginManager()
-login_manager.init_app(app)
+def createFlaskApp():
+    global app
+    global login_manager
+    
+    try:
+        # create and config flask app
+        app = flask.Flask(__name__)
+        #app.config["DEBUG"]=True
+        app.config["SECRET_KEY"]="HM_GTU_CSE495"
+
+        login_manager = flask_login.LoginManager()
+        login_manager.init_app(app)
+
+    except Exception as e:
+        print("Flask ask create exception:",str(e))
+        # Fatal Exception
+        exit()
+    return app
+
+createFlaskApp()
+
+############### END_ OF GLOBAL AREA - FLASK SETTINS ###############
 
 class User(flask_login.UserMixin):
     def __init__(self,id):
@@ -94,7 +114,6 @@ def unauthorized_handler():
 def root():
     return flask.render_template("index.html")
 
-
 @app.route("/getTraps",methods=["POST"])
 @flask_login.login_required
 def getTraps():
@@ -150,9 +169,13 @@ def takePhoto():
         req = flask.request.get_json()
         serial = req["serial"]
 
-        print("TakePhotoReqFrom:",serial)
+        retVal = socketThread.sendReq2Trap(serial,Constants.REQ_TAKE_PHOTO)
+        if retVal == Constants.ERROR_CONNECTION:
+            status = Constants.ERROR_CONNECTION
+        else:
+            print("TakePhotoReqFrom:",serial)
 
-        status = Constants.SUCCESS
+            status = Constants.SUCCESS
 
     except Exception as e:
         print("main: takePhoto: exception:",str(e))
@@ -161,11 +184,9 @@ def takePhoto():
     return flask.jsonify({"status":status})
 
 
-socketThread = None
 # you can access active trap connections with
 # trap = socketThread.connections[ipAddress]
 # trap.socket, trap.thread ...
-
 if __name__ == "__main__":
     try:
         # listen socket and create thread for each trap

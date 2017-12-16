@@ -4,6 +4,15 @@ import Constants
 
 import sys
 
+CHECK_TRAP_SERIAL_QUERY = """SELECT id FROM AllTraps WHERE serial={}"""
+CHECK_SERVED_TRAP_SERIAL_QUERY = """SELECT * FROM ServedTraps WHERE serial={}"""
+CHECK_USER_TRAPS_QUERY = """SELECT * FROM ServedTraps WHERE userId={}"""
+CHECK_USER_CREDENTIALS_QUERY = """SELECT * FROM Users WHERE email="{}" AND password="{}" """
+INSERT_USERS_QUERY = """INSERT INTO Users(email,password) VALUES("{}","{}")"""
+INSERT_SERVED_TRAP_QUERY = """INSERT INTO ServedTraps(serial,userId) VALUES({},{})"""
+CHECK_SERVED_TRAPS = """SELECT * FROM ServedTraps WHERE email="{}" """
+GET_USERID_QUERY = """SELECT id FROM Users WHERE email="{}" """
+
 def openConnection():
     try:
         print("SQLite DB File Path:",initDBs.dbFilePath)
@@ -20,7 +29,7 @@ def checkCredential(email,password):
         conn = openConnection()
         curr = conn.cursor()
 
-        query = initDBs.CHECK_USER_CREDENTIALS.format(email,password)
+        query = CHECK_USER_CREDENTIALS_QUERY.format(email,password)
         print("CheckCredential:",query)
         qResult = curr.execute(query).fetchone()
         if qResult==None:
@@ -48,12 +57,12 @@ def createAccount(serial,email,password):
         curr = conn.cursor()
 
         # first create user
-        query = initDBs.INSERT_USERS_QUERY.format(email,password)
+        query = INSERT_USERS_QUERY.format(email,password)
         print("CreateAccount:",query)
         curr.execute(query)
 
         # get created user index-id
-        query = initDBs.GET_USERID_QUERY.format(email)
+        query = GET_USERID_QUERY.format(email)
         print("CreateAccount:",query)
         userId = curr.execute(query).fetchone()[0]
                 
@@ -61,7 +70,7 @@ def createAccount(serial,email,password):
             raise Exception
 
         # serve trap for created user
-        query = initDBs.INSERT_SERVED_TRAP_QUERY.format(serial,userId)
+        query = INSERT_SERVED_TRAP_QUERY.format(serial,userId)
         print("CreateAccount:",query)
         curr.execute(query)
         conn.commit()
@@ -89,7 +98,7 @@ def checkAccount(serial,email):
         cur = conn.cursor()
 
         # check AllTraps table to check if serial valid
-        query = initDBs.CHECK_TRAP_SERIAL_QUERY.format(serial)
+        query = CHECK_TRAP_SERIAL_QUERY.format(serial)
 
         qResult = cur.execute(query).fetchone() # save query result
 
@@ -99,7 +108,7 @@ def checkAccount(serial,email):
 
         else:
             # check if serial used before
-            query = initDBs.CHECK_SERVED_TRAP_SERIAL_QUERY.format(serial)
+            query = CHECK_SERVED_TRAP_SERIAL_QUERY.format(serial)
             qResult = cur.execute(query).fetchone()
 
             # TODO: check email used before
@@ -127,11 +136,11 @@ def getTraps(email):
         conn  = openConnection()
         cur = conn.cursor()
 
-        query = initDBs.GET_USERID_QUERY.format(email)
+        query = GET_USERID_QUERY.format(email)
         print("getTraps:",query)
         userId = cur.execute(query).fetchone()[0]
 
-        query = initDBs.CHECK_USER_TRAPS_QUERY.format(userId)
+        query = CHECK_USER_TRAPS_QUERY.format(userId)
         print("getTraps:",query)
 
         qResult = cur.execute(query).fetchall() # save query result

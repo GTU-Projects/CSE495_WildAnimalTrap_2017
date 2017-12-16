@@ -5,15 +5,6 @@ dbFilePath = os.path.dirname(os.path.abspath(__file__))
 dbFilePath = dbFilePath+"/WildAnimalTrap.db"
 print("DB_FILE PATH:",dbFilePath)
 
-CHECK_TRAP_SERIAL_QUERY = """SELECT id FROM AllTraps WHERE serial={}"""
-CHECK_SERVED_TRAP_SERIAL_QUERY = """SELECT * FROM ServedTraps WHERE serial={}"""
-CHECK_USER_TRAPS_QUERY = """SELECT * FROM ServedTraps WHERE userId={}"""
-CHECK_USER_CREDENTIALS = """SELECT * FROM Users WHERE email="{}" AND password="{}" """
-INSERT_USERS_QUERY = """INSERT INTO Users(email,password) VALUES("{}","{}")"""
-INSERT_SERVED_TRAP_QUERY = """INSERT INTO ServedTraps(serial,userId) VALUES({},{})"""
-CHECK_SERVED_TRAPS = """SELECT * FROM ServedTraps WHERE email="{}" """
-GET_USERID_QUERY = """SELECT id FROM Users WHERE email="{}" """
-
 def initialize():
 	# remote old db file
 	if os.path.exists(dbFilePath):
