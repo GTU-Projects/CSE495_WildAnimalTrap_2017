@@ -1,10 +1,18 @@
 import flask
 import flask_login
 import json
-import Constants
+import sys, os
+
 from db import DBHelper
-import comHelper
-from client_thread import trapThreads
+from modules import comHelper
+from modules.client_thread import trapThreads
+
+PATH = os.path.dirname(os.path.abspath(__file__))
+PROJECT_PATH = os.path.dirname(PATH)
+sys.path.insert(0,PROJECT_PATH+"/SharedData")
+
+import Constants
+
 
 ############### HEAD OF GLOBAL AREA - FLASK SETTINS ###############
 app = None

@@ -73,9 +73,10 @@ trapApp.controller('trapsController', function($scope,$http) {
 trapApp.controller('trapDetailController', function($scope) {
     $scope.status = 'Online';
     $scope.name="x";
+    // save trap serial in cookie to use in trap special pages 
     $scope.serial = document.cookie;
     $scope.location = "x";
-    
+
     $scope.setDoor = function(nextState){
 
         sendData = {"serial":activeTrapSerial, "nextState":nextState}

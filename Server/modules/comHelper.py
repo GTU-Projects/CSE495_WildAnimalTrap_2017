@@ -90,7 +90,15 @@ class ServerConnHelperThread(threading.Thread):
             if len(trapThreads)==0:
                 print("Trap not connected yet.")
                 return Constants.ERROR_CONNECTION
-            trapThreads[str(serial)].transmitQueue.put(str(reqConstant))
+            # send command to trap special thread
+            trapThreads[str(serial)].tQue.put(str(reqConstant))
+
+            # now, wait and take response for taking photo request
+            print("Waitin for taking photo response")
+            resp  = trapThreads[str(serial)].rQue.get()
+
+            print("Resp:",type(resp))
+
         except Exception as e:
             print("**Exception:",__file__," sendReq2Trap:",str(e))
 

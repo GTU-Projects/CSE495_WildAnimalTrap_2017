@@ -27,7 +27,7 @@ class TrapServiceThread(threading.Thread):
         threading.Thread.__init__(self)
         self.threadDoneFlag=False
 
-        socket.settimeout(3.0)
+        socket.settimeout(5.0)
         self.trapData = ClientData(ip,socket,self,rQue, tQue)
 
         self.logger = logging.getLogger("ClientThread["+str(ip)+"]")
@@ -35,9 +35,9 @@ class TrapServiceThread(threading.Thread):
 
     def run(self):
 
-        serial = self.trapData.socket.recv(256).decode("UTF-8") # read serial number first
+        serial = self.trapData.socket.recv(256) # read serial number first
         
-        self.trapData.socket.send("A".encode()) # send acknowledge message to trap
+        self.trapData.socket.send(b'A') # send acknowledge message to trap
         print("Trap:",serial,"connected")
         # TODO: if serial is valid ...
 
@@ -51,7 +51,17 @@ class TrapServiceThread(threading.Thread):
                 # socket recv has 3 seconds timeout
                 buffer = None
                 try:
-                    buffer = self.trapData.socket.recv(10).decode("UTF-8") # read byte from socket
+
+                    # if timeout occur, throw timeout exception
+                    buffer = self.trapData.socket.recv(1024*1024)
+                
+                    if buffer:
+                        # write image to file
+                        with open("a.jpg","wb") as f:
+                            f.write(buffer)
+                            print("PhotoSaved")
+                        continue
+
                 except Exception as e:
                     buffer = None
 
@@ -59,9 +69,10 @@ class TrapServiceThread(threading.Thread):
                 if not buffer:
                     # if queue is empty, will raise exception
                     cmd = self.trapData.tQue.get_nowait()
-                    if cmd: 
+                    if cmd:
+                        print("Send Req:",cmd)
                         # send command to trap/rpi
-                        self.trapData.socket.sendall(cmd)
+                        self.trapData.socket.sendall(cmd.encode())
                 elif buffer == "A":
                     print("Trap Send Animal caught signal")
                 elif buffer.startswith('P-'):

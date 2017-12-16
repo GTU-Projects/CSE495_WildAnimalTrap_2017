@@ -12,15 +12,16 @@ class SocketInterface():
         try:
             self.socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
             self.socket.connect((self.ip,self.port))
+            self.socket.settimeout(2)
             self.isConnected = True
         except Exception as e:
             self.isConnected = False
             print("SocketInterface: connect: exception:",str(e))
 
-    def send2Socket(self,str):
+    def send2Socket(self,byteArray):
         retVal = False
         try:
-            self.socket.sendall(str.encode())
+            self.socket.sendall(byteArray)
             retVal= True
         except Exception as e:
             print("SocketInterface: send2Socket: exception:",str(e))
@@ -31,7 +32,10 @@ class SocketInterface():
 
         retVal = None
         try:
-            retVal =  self.socket.recv(1)
+            retVal =  self.socket.recv(10)
+            if not retVal:
+                self.disconnect()
+            print("Recv:",retVal)
         except Exception as e:
             print("SocketInterface: receiveFromSocket: exception:",str(e))
             retVal = None
@@ -40,3 +44,4 @@ class SocketInterface():
     
     def disconnect(self):
         self.socket.close()
+        self.isConnected=False
