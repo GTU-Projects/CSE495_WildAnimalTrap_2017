@@ -13,6 +13,8 @@ sys.path.insert(0,PROJECT_PATH+"/SharedData")
 
 import Constants
 
+trapDataDirPath = PATH+"/static/.trapData"
+
 
 ############### HEAD OF GLOBAL AREA - FLASK SETTINS ###############
 app = None
@@ -74,11 +76,13 @@ def sigup():
         # if creates return success otherwise return error
         retVal = DBHelper.createAccount(serial,email,password)
 
+        
+        os.mkdir(trapDataDirPath+"/"+serial)
+
         return flask.jsonify({"status":retVal})
     except Exception as e:
         print("Exception:"+str(e))
         return flask.jsonify({"status":Constants.ERROR_UNKNOWN})
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -191,12 +195,31 @@ def takePhoto():
 
     return flask.jsonify({"status":status})
 
+@app.route("/getPhotoPaths",methods=["POST"])
+@flask_login.login_required
+def getPhotoPaths():
+    status = Constants.SUCCESS
+    try:
+        req = flask.request.get_json()
+        serial = req["serial"]
+
+        fileList = os.listdir(trapDataDirPath+"/"+serial)
+        print(fileList)
+        return flask.jsonify({"status":status,"paths":fileList})
+    except Exception as e:
+        status = Constants.ERROR_UNKNOWN
+        return flask.jsonify({"status":status})
+
 
 # you can access active trap connections with
 # trap = socketThread.connections[ipAddress]
 # trap.socket, trap.thread ...
 if __name__ == "__main__":
     try:
+
+        if not os.path.exists(trapDataDirPath):
+            os.mkdir(trapDataDirPath)
+            print("Trap Data Directory created.")
         # listen socket and create thread for each trap
         # all trap communication will be served over connection helper
         socketThread = comHelper.ServerConnHelperThread(5669)

@@ -49,6 +49,11 @@ trapApp.config(function($routeProvider) {
             controller  : 'trapDetailController'
         })
 
+        .when('/photos', {
+            templateUrl : '/static/partials/photos.html',
+            controller  : 'photosController'
+        })
+
 });
 
 
@@ -77,6 +82,7 @@ trapApp.controller('trapDetailController', function($scope) {
     $scope.serial = document.cookie;
     $scope.location = "x";
 
+    // TODO: change activeTrapSerial variable
     $scope.setDoor = function(nextState){
 
         sendData = {"serial":activeTrapSerial, "nextState":nextState}
@@ -108,6 +114,7 @@ trapApp.controller('trapDetailController', function($scope) {
 
         sendData = {"serial":activeTrapSerial}
 
+
         $.ajax({
             url: "takePhoto",
             type: "POST",
@@ -123,6 +130,51 @@ trapApp.controller('trapDetailController', function($scope) {
                 }
             }
         });
+    };
+});
+
+
+trapApp.controller('photosController', function($scope) {
+
+    serial = document.cookie
+    sendData = {"serial":serial};
+
+    $scope.photos = [];
+
+    $.ajax({
+        url: "getPhotoPaths",
+        type: "POST",
+        data: JSON.stringify(sendData),
+        contentType: "application/json",
+        // data has status variable
+        success: function(data,status){
+            for(i=0;i<data["paths"].length;i++){
+                photoPath = "/static/.trapData/"+serial+"/"+data["paths"][i];
+                //alert(photoPath);
+                item = {src:photoPath,desc:i};
+                $scope.photos.push(item);
+                //alert($scope.photos[i]["src"]);
+            }
+            $scope.$apply();
+        }
+    });
+
+    $scope.photoIndex = 0;
+
+    $scope.isActive = function (index) {
+        return $scope.photoIndex === index;
+    };
+    // show prev image
+    $scope.showPrev = function () {
+        $scope.photoIndex = ($scope.photoIndex > 0) ? --$scope.photoIndex : $scope.photos.length - 1;
+    };
+    // show next image
+    $scope.showNext = function () {
+        $scope.photoIndex = ($scope.photoIndex < $scope.photos.length - 1) ? ++$scope.photoIndex : 0;
+    };
+    // show a certain image
+    $scope.showPhoto = function (index) {
+        $scope.photoIndex = index;
     };
 });
 

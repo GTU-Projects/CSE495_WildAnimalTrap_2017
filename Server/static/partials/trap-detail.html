@@ -1,31 +1,47 @@
 <div class="jumbotron text-center">
+    <label>Details</label>
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <p>Serial:{{ serial }}</p>
-            <p>Status:{{ status }}</p>
-            <p>Name:{{ name }}</p>
-            <p>Location:{{ location }}</p>
-            <hr>
-            
         </div>
-        <div class="col-md-4">
-            <p> Controls</p>
+        <div class="col-md-3">
+            <p>Status:{{ status }}</p>
+        </div>
+        <div class="col-md-3">
+            <p>Name:{{ name }}</p>
+        </div>
+        <div class="col-md-3">
+            <p>Location:{{ location }}</p>
+        </div>
+    </div>
+
+    <label>Controls</label>
+    <div class="row">
+        
+        <div class="col-md-3">
             <a class="btn btn-info btn-lg" ng-click="takePhoto()">
                 <span class="glyphicon glyphicon-camera"></span> Take Photo
             </a>
-            <br>
-            <br>
+        </div>
+        <div class="col-md-3">
             <a class="btn btn-info btn-lg" ng-click="setDoor(0)">
                 <span class="glyphicon glyphicon-lock"></span> Open Door
             </a>
+        </div>
+        <div class="col-md-3">
             <a class="btn btn-info btn-lg" ng-click="setDoor(1)">
                 <span class="glyphicon glyphicon-lock"></span> Close Door
             </a>
         </div>
-        <div class="col-md-4">
-            <p> Photos</p>
-            <img src="/static/ex1.jpg" class="img-circle" alt="First" width="304" height="236"> 
-            <img src="/static/ex2.jpg" class="img-circle" alt="First" width="304" height="236"> 
+        <div class="col-md-3">
+            <a href="/#!/photos/" class="btn btn-info btn-lg" >
+                <span class="glyphicon glyphicon-picture"></span> All Photos
+            </a>
         </div>
+    </div>
+
+    <label>Last Photo</label>    
+    <div class="row">
+        <img src="/static/ex1.jpg" class="img-circle" alt="First" width="150" height="150">
     </div>
 </div>

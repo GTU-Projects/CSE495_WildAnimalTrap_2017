@@ -1,0 +1,20 @@
+<!-- photos.html -->
+<div class="jumbotron text-center">
+        <!-- enumerate all photos -->
+        <a class="arrow prev" ng-click="showPrev()">Prev</a>
+        <div ng-repeat="photo in photos">
+            <img witdh="300" height="300" class="slide" ng-show="isActive($index)" ng-src="{{photo.src}}" />
+            <div class="caption" ng-show="isActive($index)">
+                <p>{{photo.desc}}</p>
+            </div>
+        </div>
+        <a class="arrow next" ng-click="showNext()">Next</a>
+        <div class="row">
+            <div class="list-group list-group-horizontal" >
+                <figure class="list-group-item col-md-2" ng-repeat="photo in photos" class="figure">
+                    <img class="figure-img img-fluid rounded" ng-src="{{photo.src}}" height="100" width="100" alt="{{photo.desc}}" title="{{photo.desc}}" ng-click="showPhoto($index);" />
+                    <figcaption class="figure-caption">{{photo.desc}}</figcaption>
+                </figure>
+            </div>
+        </div>
+</div>
