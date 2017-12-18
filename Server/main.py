@@ -185,15 +185,24 @@ def takePhoto():
         if retVal == Constants.ERROR_CONNECTION:
             status = Constants.ERROR_CONNECTION
         else:
-            print("TakePhotoReqFrom:",serial)
-
             status = Constants.SUCCESS
-
     except Exception as e:
         print("main: takePhoto: exception:",str(e))
         status = Constants.ERROR_UNKNOWN
-
     return flask.jsonify({"status":status})
+
+
+@app.route("/getLastPhotoName",methods=["POST"])
+@flask_login.login_required
+def getLastPhotoName():
+    try:
+        data = flask.request.get_json()
+        serial = data["serial"]
+
+        return flask.jsonify({"status":Constants.SUCCESS,"name":"2017-12-17_22:11:43.515418.jpg"})
+    except:
+        return flask.jsonify({"status":Constants.ERROR_UNKNOWN})
+
 
 @app.route("/getPhotoPaths",methods=["POST"])
 @flask_login.login_required

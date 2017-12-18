@@ -76,16 +76,19 @@ trapApp.controller('trapsController', function($scope,$http) {
 });
 
 trapApp.controller('trapDetailController', function($scope) {
+
+    currTrapSerial = document.cookie
+
     $scope.status = 'Online';
     $scope.name="x";
     // save trap serial in cookie to use in trap special pages 
-    $scope.serial = document.cookie;
+    $scope.serial = currTrapSerial;
     $scope.location = "x";
 
     // TODO: change activeTrapSerial variable
     $scope.setDoor = function(nextState){
 
-        sendData = {"serial":activeTrapSerial, "nextState":nextState}
+        sendData = {"serial":currTrapSerial, "nextState":nextState}
         
         $.ajax({
             url: "takePhoto",
@@ -112,8 +115,7 @@ trapApp.controller('trapDetailController', function($scope) {
 
     $scope.takePhoto = function(){
 
-        sendData = {"serial":activeTrapSerial}
-
+        sendData = {"serial":currTrapSerial}
 
         $.ajax({
             url: "takePhoto",
@@ -122,16 +124,49 @@ trapApp.controller('trapDetailController', function($scope) {
             contentType: "application/json",
             // data has status variable
             success: function(data,status){
+                
                 retVal = assembleStatus(data["status"]);
                 if(retVal==true){
-                    alert("take photo completed.");
+                    updateLastPhoto($scope,currTrapSerial);
                 }else{
-                    alert(retVal);
+                    alert("Error:"+retVal);
                 }
-            }
+            }// end of takephoto success func
         });
     };
+
+
+    updateLastPhoto($scope,currTrapSerial);
+
 });
+
+function updateLastPhoto($scope,serial){
+
+    sendData = {"serial":serial};
+
+    // now, get last saved photo name
+    $.ajax({
+        url: "getLastPhotoName",
+        type: "POST",
+        data: JSON.stringify(sendData),
+        contentType: "application/json",
+        // data has status variable
+        success: function(data,status){
+            retVal = assembleStatus(data["status"]);
+            if(retVal==true){
+                name = data["name"];
+                item = {src:"/static/.trapData/"+serial+"/"+name,desc:name};
+
+                $scope.lastPhotoSrc = item["src"];
+                $scope.lastPhotoDesc = item["desc"];
+
+                $scope.$apply(); // update angular
+            }else{
+                alert(retVal);
+            }
+        }// end of getlastphotoname succes func
+    });
+}
 
 
 trapApp.controller('photosController', function($scope) {
@@ -151,7 +186,7 @@ trapApp.controller('photosController', function($scope) {
             for(i=0;i<data["paths"].length;i++){
                 photoPath = "/static/.trapData/"+serial+"/"+data["paths"][i];
                 //alert(photoPath);
-                item = {src:photoPath,desc:i};
+                item = {src:photoPath,desc:data["paths"][i]};
                 $scope.photos.push(item);
                 //alert($scope.photos[i]["src"]);
             }

@@ -37,7 +37,7 @@ class SocketInterface():
                 self.disconnect()
             print("Recv:",retVal)
         except Exception as e:
-            print("SocketInterface: receiveFromSocket: exception:",str(e))
+            #print("SocketInterface: receiveFromSocket: exception:",str(e))
             retVal = None
 
         return retVal

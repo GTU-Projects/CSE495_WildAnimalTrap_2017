@@ -2,6 +2,8 @@ import threading
 import time
 from SocketInterface import SocketInterface
 import Constants
+import os
+path = os.path.dirname(os.path.abspath(__file__))
 
 class NetworkThread(threading.Thread):
     def __init__(self,ip="138.197.121.142",port="5669",serial=95, useGPRS=False):
@@ -40,7 +42,9 @@ class NetworkThread(threading.Thread):
                         cmd = int(cmd)
                         if cmd==Constants.REQ_TAKE_PHOTO:
                             photo = getPhoto()
+                            print("Photo on sending queue")
                             self.sockInt.send2Socket(photo)
+                            print("Photo send")
                         elif cmd==Constants.REQ_CLOSE_DOOR:
                             print("CloseDoor")
                         elif cmd==Constants.REQ_OPEN_DOOR:
@@ -57,8 +61,7 @@ class NetworkThread(threading.Thread):
     def stop(self):
         self.threadDone = True
 
-import os
-path = os.path.dirname(os.path.abspath(__file__))
+
 def getPhoto(path=path+"/wolf.jpg"):
     photo=None
     try:

@@ -4,6 +4,7 @@ import time
 import threading
 import queue
 import Constants
+import traceback
 from client_thread import TrapServiceThread 
 from client_thread import trapThreads
 
@@ -90,17 +91,18 @@ class ServerConnHelperThread(threading.Thread):
             if len(trapThreads)==0:
                 print("Trap not connected yet.")
                 return Constants.ERROR_CONNECTION
+
             # send command to trap special thread
             trapThreads[str(serial)].tQue.put(str(reqConstant))
+            print("Message put on transmit queue")
 
             # now, wait and take response for taking photo request
-            print("Waitin for taking photo response")
             resp  = trapThreads[str(serial)].rQue.get()
-
-            print("Resp:",type(resp))
-
+            return resp
         except Exception as e:
-            print("**Exception:",__file__," sendReq2Trap:",str(e))
+            traceback.print_exc()
+            print("**Exception: comHelper: sendReq2Trap",str(e))
+            return Constants.ERROR_CONNECTION
 
 
 if __name__=="__main__":

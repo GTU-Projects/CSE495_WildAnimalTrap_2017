@@ -1,5 +1,5 @@
 <div class="jumbotron text-center">
-    <label>Details</label>
+    <h3><span class="font-weight-bold">Details</span></h3>
     <div class="row">
         <div class="col-md-3">
             <p>Serial:{{ serial }}</p>
@@ -14,10 +14,9 @@
             <p>Location:{{ location }}</p>
         </div>
     </div>
-
-    <label>Controls</label>
+    <br><br>
+    <h3><span class="font-weight-bold">Controls</span></h3>
     <div class="row">
-        
         <div class="col-md-3">
             <a class="btn btn-info btn-lg" ng-click="takePhoto()">
                 <span class="glyphicon glyphicon-camera"></span> Take Photo
@@ -39,9 +38,12 @@
             </a>
         </div>
     </div>
-
-    <label>Last Photo</label>    
+    <br><br>
+    <h3><span class="font-weight-bold">Last Photo</span></h3> 
     <div class="row">
-        <img src="/static/ex1.jpg" class="img-circle" alt="First" width="150" height="150">
+        <figure class="figure">
+            <img ng-src="{{lastPhotoSrc}}" class="figure-img img-fluid rounded" height="250" width="250"/>
+            <figcaption class="figure-caption"><strong>{{lastPhotoDesc}}</strong></figcaption>
+        </figure>
     </div>
 </div>

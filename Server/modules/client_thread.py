@@ -2,12 +2,14 @@ import threading
 import time
 import logging
 import queue
-
+import sys,os
+from datetime import datetime as date
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)-20s - %(levelname)-10s - %(threadName)-10s - %(message)s',
                     )
 
+PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 trapThreads = {}
 
@@ -34,8 +36,10 @@ class TrapServiceThread(threading.Thread):
         self.logger.setLevel(logging.DEBUG)
 
     def run(self):
+        global trapThreads
 
         serial = self.trapData.socket.recv(256) # read serial number first
+        serial = str(serial.decode("UTF-8"))
         
         self.trapData.socket.send(b'A') # send acknowledge message to trap
         print("Trap:",serial,"connected")
@@ -51,15 +55,18 @@ class TrapServiceThread(threading.Thread):
                 # socket recv has 3 seconds timeout
                 buffer = None
                 try:
-
                     # if timeout occur, throw timeout exception
                     buffer = self.trapData.socket.recv(1024*1024)
-                
                     if buffer:
-                        # write image to file
-                        with open("a.jpg","wb") as f:
+                        fileName = str(date.now()).replace(" ","_")
+                        photoPath = PATH+"/static/.trapData/"+serial+"/"+fileName+".jpg"
+                        print("Photo will be saved at:",photoPath)
+                        # write image to file and send complete message to flask rest
+                        with open(photoPath,"wb") as f:
                             f.write(buffer)
-                            print("PhotoSaved")
+                            os.sync() # direct write to disk
+                            print("PhotoSaved:",photoPath)
+                        self.trapData.rQue.put(fileName)
                         continue
 
                 except Exception as e:
