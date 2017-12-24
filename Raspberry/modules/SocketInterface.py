@@ -17,6 +17,7 @@ class SocketInterface():
         except Exception as e:
             self.isConnected = False
             print("SocketInterface: connect: exception:",str(e))
+        return self.isConnected
 
     def send2Socket(self,byteArray):
         retVal = False
@@ -27,12 +28,15 @@ class SocketInterface():
             print("SocketInterface: send2Socket: exception:",str(e))
 
         return retVal
+        
+    def flushBuffer(self):
+        self.socket.flush()
 
-    def receiveFromSocket(self):
+    def receiveFromSocket(self,size):
 
         retVal = None
         try:
-            retVal =  self.socket.recv(10)
+            retVal =  self.socket.recv(size)
             if not retVal:
                 self.disconnect()
             print("Recv:",retVal)

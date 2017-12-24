@@ -13,12 +13,14 @@ def main():
     netThread = None
     try:
         #netThread = NT.NetworkThread("127.0.0.1",5669,"95")
-        netThread = NM.NetworkThread("138.197.121.142",5669,"95",True)
+        netThread = NM.NetworkThread("138.197.121.142",5669,"95",useGPRS=False)
         #netThread.setDaemon(True)
         netThread.start()
+        
 
         while not netThread.threadDone:
-            time.sleep(1)
+            time.sleep(10)
+            NM.addServerPendingQue(b'123')
             
     except Exception as e:
         print("NetworkThread: main: exception: ",str(e))

@@ -23,20 +23,21 @@ class GPRS_GSM():
 
         return self.isConnected
 
-    def sendCommand(self,cmd):
+    def sendCommand(self,cmd,timeout):
         try:
-            print("Send:",cmd)
+            print("++>Send:",cmd)
             self.conn.write(cmd.encode())
+            time.sleep(timeout)
             retVal = self.conn.readline()
             retVal = self.conn.readline()
-            print("Resp:",retVal)
+            print("-->Resp:",retVal)
             return retVal
         except Exception as e:
             print("SendCommandException:",str(e))
 
     def initAT(self):
-        self.sendCommand("AT\r")
-        self.sendCommand("ATE0\r") # close echo mode
+        self.sendCommand("AT\r",1)
+        self.sendCommand("ATE0\r",1) # close echo mode
         print("initAT End")
 
     def initNetworkCfg(self):
@@ -44,38 +45,50 @@ class GPRS_GSM():
         #self.sendCommand("AT+CREG?\r")
         #self.sendCommand("AT+CGATT?\r")
         
-        while self.sendCommand("AT+CIPSHUT\r") != b'SHUT OK\r\n':
+        while self.sendCommand("AT+CIPSHUT\r",1) != b'SHUT OK\r\n':
             time.sleep(0.5)
             
-        while self.sendCommand("AT+CIPSTATUS\r") != b'OK\r\n':
+        while self.sendCommand("AT+CIPSTATUS\r",1) != b'OK\r\n':
             time.sleep(0.5)
         
-        while self.sendCommand("AT+CIPMUX=0\r")!=b'STATE: IP INITIAL\r\n':
+        resp = self.sendCommand("AT+CIPMUX=0\r",1)
+        while resp and resp!=b'OK\r\n':
+            resp = self.sendCommand("AT+CIPMUX=0\r",1)
             time.sleep(0.5)
             
-        while self.sendCommand("AT+CGATT\r") != b'OK\r\n':
+        resp =  self.sendCommand("AT+CGATT\r",1)
+        while resp and resp != b'OK\r\n':
+            resp = self.sendCommand("AT+CGATT\r",1)
             time.sleep(0.5)
             
         #self.sendCommand("AT+CSTT?\r")
         
-        while self.sendCommand("AT+CSTT=\"vodafone\",\"\",\"\"\r") != b'OK\r\n':
+        reps = self.sendCommand("AT+CSTT=\"vodafone\",\"\",\"\"\r",1)
+        while resp and resp != b'OK\r\n':
+            resp = self.sendCommand("AT+CSTT=\"vodafone\",\"\",\"\"\r",1)
             time.sleep(0.5)
             
         # bring-up gprs connection
-        while self.sendCommand("AT+CIICR\r") != b'OK\r\n' or False:
+        resp  = self.sendCommand("AT+CIICR\r",2)
+        while resp and resp!= b'OK\r\n':
+            resp  = self.sendCommand("AT+CIICR\r",2)
             time.sleep(0.5)
             
-        self.sendCommand("AT+CIFSR\r")
+        self.sendCommand("AT+CIFSR\r",2)
         print("initNetCfg End")
         return True
         
     def openTCPSocket(self,ip,port):
-        while self.sendCommand("AT+CIPSTART=\"TCP\",\"{}\",\"{}\"\r".format(ip,port)) != b'OK\r\n':
+        resp = self.sendCommand("AT+CIPSTART=\"TCP\",\"{}\",\"{}\"\r".format(ip,port),3)
+        while resp and resp != b'OK\r\n':
+            resp =self.sendCommand("AT+CIPSTART=\"TCP\",\"{}\",\"{}\"\r".format(ip,port),3)
             time.sleep(0.5)
-            
+        
+        # read new lines from uart line    
         self.readLineFromSocket()
-        self.readLineFromSocket()
-        print("openTCPSocket End")
+        # read tcp socket status
+        tcpStatus = self.readLineFromSocket()
+        print("## openTCPSocket End")
 
     def makeCall(self,phone):
         print("Start to call.ATD{number};\r".format(number=phone))
@@ -102,7 +115,6 @@ class GPRS_GSM():
         while len(r)!=0 or r!=b'SEND OK\r\n':
             r=self.readLineFromSocket()
             
-        
     def finishCall(self):
         self.sendCommand("ATH0\r");
         print("Finish phone call")
