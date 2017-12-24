@@ -1,5 +1,6 @@
 import os,sys
-from modules import NetworkThread as NT
+import time
+from modules import NetworkManager as NM
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 PROJECT_PATH = os.path.dirname(PATH)
@@ -11,13 +12,14 @@ def main():
 
     netThread = None
     try:
-        netThread = NT.NetworkThread("127.0.0.1",5669,"95")
+        #netThread = NT.NetworkThread("127.0.0.1",5669,"95")
+        netThread = NM.NetworkThread("138.197.121.142",5669,"95",True)
         #netThread.setDaemon(True)
         netThread.start()
 
         while not netThread.threadDone:
-            pass
-
+            time.sleep(1)
+            
     except Exception as e:
         print("NetworkThread: main: exception: ",str(e))
     except KeyboardInterrupt:
