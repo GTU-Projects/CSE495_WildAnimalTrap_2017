@@ -9,14 +9,17 @@ class Camera():
         #self.rawCapture = PiRGBArray(self.camera,size=self.camera.resolution())
         
     def getFrame(self):
-        time.sleep(3)
-        print("11")
-        self.camera.capture("p.jpg")
-        time.sleep(3)
-        print("22")
-        self.camera.capture("p1.jpg")
-
+        photoName = None
+        try:
+            time.sleep(2)
+            photoName = time.strftime("%Y-%m-%d_%H.%M.%S",time.gmtime())+".jpg"
+            self.camera.capture(photoName)
+        except Exception as e:
+            print("GetFrameException:",str(e))
+            photoName = None
+            
+        return photoName
 
 if __name__=="__main__":
     cam = Camera()
-    cam.getFrame()
+    print("Photo:",cam.getFrame(),"saved.")

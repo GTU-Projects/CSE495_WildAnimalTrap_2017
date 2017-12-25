@@ -5,11 +5,8 @@ import os,sys
 import GPRS_GSM
 import string
 import queue
-
-RPi_SRC_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROJECT_PATH = os.path.dirname(RPi_SRC_PATH)
-sys.path.insert(0,PROJECT_PATH+"/SharedData")
 import Constants
+import CameraService
 
 tQue = queue.Queue()
 rQue = queue.Queue()
@@ -27,11 +24,9 @@ class NetworkThread(threading.Thread):
         self.port=port
         self.isInitialized = False # to initialize gsm modelu just one time
         
-        if useGPRS:
-            self.comInt = GPRS_GSM.GPRS_GSM("/dev/ttyAMA0",19200,1.0)
-            self.comInt.initHWModule()
-        else:
-            self.comInt = SocketInterface.SocketInterface(self.ip,self.port)
+        self.cam = CameraService.Camera()
+
+        self.comInt = SocketInterface.SocketInterface(self.ip,self.port)
         print("NetworkThread initialized.")
         
     def run(self):
@@ -43,12 +38,7 @@ class NetworkThread(threading.Thread):
                     if self.comInt.connect():
                         break
                     time.sleep(1)
-                    """
-                    if not self.isInitialized:
-                        if self.comInt.initNetworkCfg():
-                            self.comInt.openTCPSocket(self.ip,self.port)
-                    self.isInitialized=True
-                    """
+
                 print("NT Connected to socket")
 
                 # send serial number to thread
@@ -96,10 +86,15 @@ class NetworkThread(threading.Thread):
                                 print("Push Bait")
                                 self.comInt.send2Socket(b'10')
                             elif cmd==Constants.REQ_TAKE_PHOTO:
-                                photo = getPhoto()
-                                print("Photo on sending queue")
+                                # take frame from camera and convert it
+                                # byte array to send over socket
+                                photoName = self.cam.getFrame()
+                                photo = getPhotoByteArray(photoName)
+                                # first send photo code, name and photo
+                                self.comInt.send2Socket(b'11')
+                                self.comInt.send2Socket(photoName.encode())
                                 self.comInt.send2Socket(photo)
-                                print("Photo send")
+                                print("Photo:",photoName,"was sent")
                     except Exception as e:
                         print("NetworkThread: run: readSockException:",str(e))
                     
@@ -117,7 +112,7 @@ class NetworkThread(threading.Thread):
 def addServerPendingQue(bArray):
     tQue.put(bArray)
 
-def getPhoto(path=RPi_SRC_PATH+"/wolf.jpg"):
+def getPhotoByteArray(path="wolf.jpg"):
     photo=None
     try:
         with open(path,"rb") as f:
