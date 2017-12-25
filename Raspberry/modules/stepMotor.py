@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+import Constants
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -31,24 +32,28 @@ class MB11_stepper():
     def turnLeft(self):
         """ Turn motor 1 complete step to left
         """
+        print("G1")
         GPIO.output(self.gBottom,1)
         GPIO.output(self.yBottom,0)
         GPIO.output(self.gTop,0)
         GPIO.output(self.yTop,0)
         time.sleep(self.stepDelay)
 
+        print("G2")
         GPIO.output(self.gBottom,0)
         GPIO.output(self.yBottom,0)
         GPIO.output(self.gTop,1)
         GPIO.output(self.yTop,0)
         time.sleep(self.stepDelay)
 
+        print("S1")
         GPIO.output(self.gBottom,0)
         GPIO.output(self.yBottom,1)
         GPIO.output(self.gTop,0)
         GPIO.output(self.yTop,0)
         time.sleep(self.stepDelay)
 
+        print("S2")
         GPIO.output(self.gBottom,0)
         GPIO.output(self.yBottom,0)
         GPIO.output(self.gTop,0)
@@ -87,16 +92,18 @@ class MB11_stepper():
         print("Turn 5*10 complete step to left and right")
         for i in range(0,5):
             for j in range(0,10):
-                self.turnRight()
-            for j in range(0,10):
                 self.turnLeft()
+            for j in range(0,10):
+                self.turnRight()
         print("Test done! Did you see movements?")
 
-
-def stepMotorModuleTest():
-    stepMotor = MB11_stepper(gBottom=6,yBottom=13,gTop=19,yTop=26)
+def testStepMotor():
+    stepMotor = MB11_stepper(gBottom=Constants.GPIO_PIN_STEP_1,
+                            yBottom=Constants.GPIO_PIN_STEP_2,
+                            gTop=Constants.GPIO_PIN_STEP_3,
+                            yTop=Constants.GPIO_PIN_STEP_4)
     stepMotor._test()
 
+if __name__=="__main__":
+    testStepMotor()
 
- if __name__=="__main__":
-    stepMotorModuleTest()
