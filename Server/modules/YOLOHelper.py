@@ -1,4 +1,8 @@
+import sys,os
 from darknetpy.detector import Detector
+
+CURRENTDIRPATH = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0,CURRENTDIRPATH)
 
 def loadDetector():
     return Detector('/opt/darknet',
@@ -13,6 +17,6 @@ def detectPhoto(detector,photoPath):
 if __name__=="__main__":
     detector = loadDetector()
 
-    photoPath = "/opt/darknet/data/wolf.jpg"
+    photoPath =CURRENTDIRPATH+"/wolf.jpg"
     res = detectPhoto(detector,photoPath)
     print(res)
