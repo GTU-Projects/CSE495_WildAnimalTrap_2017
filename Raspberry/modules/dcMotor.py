@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+import Constants
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -72,7 +73,7 @@ class DCMotor():
         print("DC motor tests done. Did you see movements?")
 
 def dcMotorModuleTest():
-    dcMotor = DCMotor(20,21,4,200,15)
+    dcMotor = DCMotor(Constants.GPIO_PIN_DC_1,Constants.GPIO_PIN_DC_2,Constants.GPIO_PIN_DC_PWM,200,15)
 
     print("FirstTest")
     dcMotor._test()
