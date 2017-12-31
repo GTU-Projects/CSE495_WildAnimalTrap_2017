@@ -7,6 +7,7 @@ ERROR_USED_EMAIL=3
 ERROR_USED_SERIAL=4
 ERROR_UNK_SERIAL=5
 ERROR_CONNECTION = 6
+ERROR_SERIAL_INVALID=7
 
 # request codes
 REQ_OPEN_DOOR = 7
@@ -27,6 +28,19 @@ GPIO_PIN_STEP_4 = 26
 GPIO_PIN_DC_1 = 20
 GPIO_PIN_DC_2 = 21
 GPIO_PIN_DC_PWM = 18
+
+class Trap():
+    def __init__(self,serial=None,userId=None,name=None,location=None):
+        self.serial=serial
+        self.userId=userId
+        self.location=location
+        self.name=name
+        # active/passive state
+        self.ap = 1
+
+    def __str__(self):
+        str = "Serial:{}, UserId:{}, Name:{}, Location:{}"
+        return str.format(self.serial,self.userId,self.name,self.location)
 
 
 

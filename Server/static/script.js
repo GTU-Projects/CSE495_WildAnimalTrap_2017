@@ -1,5 +1,4 @@
 //'use strict';
-
 function assembleStatus(status){
     if(status==0){
         return true;
@@ -54,13 +53,20 @@ trapApp.config(function($routeProvider) {
             controller  : 'photosController'
         })
 
-});
+        .when('/settings', {
+            templateUrl : '/static/partials/settings.html',
+            controller  : 'settingsController'
+        })
 
+});
 
 trapApp.controller('aboutController', function($scope) {
     $scope.message = 'About Hasan Men ...';
 });
 
+trapApp.controller('settingsController', function($scope) {
+    $scope.message = 'Settings here';
+});
 
 trapApp.controller('trapsController', function($scope,$http) {
 
@@ -73,17 +79,52 @@ trapApp.controller('trapsController', function($scope,$http) {
         document.cookie=serial;
         $(location).attr('href',"/#!/trap-detail");
     };
+
+    $scope.addNewTrap = function(){
+        newTrapSerial = $("#newTrapSerial").val()
+        newTrapName = $("#newTrapName").val()
+        newTrapLocation = $("#newTrapLocation").val()
+
+        if(newTrapSerial=="" || newTrapName=="" || newTrapLocation==""){
+            $("#addNewTrapMessage").text("Please fill all blanks.");
+            return;
+        }
+
+        sendData = {
+            "serial":newTrapSerial,
+            "name":newTrapName,
+            "location":newTrapLocation
+        };
+
+        $.ajax({
+            url: "addNewTrap",
+            type: "POST",
+            data: JSON.stringify(sendData),
+            contentType: "application/json",
+            // data has status variable
+            success: function(data,status){
+                retVal = assembleStatus(data["status"]);
+                if(retVal==true){
+                    $("#addNewTrapMessage").text("Trap successfully was added.");
+                    // update trap list
+                    $http.post('/getTraps').then(function(response){
+                        $scope.traps =response.data;
+                        $scope.$apply(); // update angular
+                    });
+                }else{
+                    $("#addNewTrapMessage").text(retVal);
+                }
+            }
+        });
+
+    }
 });
 
 trapApp.controller('trapDetailController', function($scope) {
 
     currTrapSerial = document.cookie
 
-    $scope.status = 'Online';
-    $scope.name="x";
-    // save trap serial in cookie to use in trap special pages 
-    $scope.serial = currTrapSerial;
-    $scope.location = "x";
+    loadTrapDetails($scope,currTrapSerial);
 
     // TODO: change activeTrapSerial variable
     $scope.setDoor = function(nextState){
@@ -113,6 +154,42 @@ trapApp.controller('trapDetailController', function($scope) {
         });
     };
 
+    $scope.setTrapDetail = function(){
+        
+        newTrapName = $("#newTrapName").val()
+        newTrapLocation = $("#newTrapLocation").val()
+
+        if(newTrapName=="" || newTrapLocation==""){
+            $("#editTrapMessage").text("Please fill all blanks!");
+            return;
+        }
+
+        sendData = {
+            "serial":currTrapSerial,
+            "name":newTrapName,
+            "location":newTrapLocation
+        };
+
+        $.ajax({
+            url: "setTrapDetail",
+            type: "POST",
+            data: JSON.stringify(sendData),
+            contentType: "application/json",
+            // data has status variable
+            success: function(data,status){
+                retVal = assembleStatus(data["status"]);
+                if(retVal==true){
+                    $("#editTrapMessage").text("Details were chaned."); 
+                    $scope.name = newTrapName;
+                    $scope.location = newTrapLocation;
+                    $scope.$apply();
+                }else{
+                    $("#editTrapMessage").text("Error:"+retVal); 
+                }
+            }
+        });
+    };// end of set trap detail function
+
     $scope.takePhoto = function(){
 
         sendData = {"serial":currTrapSerial}
@@ -124,7 +201,6 @@ trapApp.controller('trapDetailController', function($scope) {
             contentType: "application/json",
             // data has status variable
             success: function(data,status){
-                
                 retVal = assembleStatus(data["status"]);
                 if(retVal==true){
                     updateLastPhoto($scope,currTrapSerial);
@@ -133,14 +209,12 @@ trapApp.controller('trapDetailController', function($scope) {
                 }
             }// end of takephoto success func
         });
-    };
+    };// end of take photo function
 
-
-    updateLastPhoto($scope,currTrapSerial);
-
+    loadLastPhoto($scope,currTrapSerial);
 });
 
-function updateLastPhoto($scope,serial){
+function loadLastPhoto($scope,serial){
 
     sendData = {"serial":serial};
 
@@ -162,12 +236,36 @@ function updateLastPhoto($scope,serial){
 
                 $scope.$apply(); // update angular
             }else{
-                alert(retVal);
+                // ıf not success, could't find any image
             }
         }// end of getlastphotoname succes func
     });
 }
 
+function loadTrapDetails($scope,serial){
+
+    sendData = {"serial":serial};
+
+    $.ajax({
+        url: "getTrapDetails",
+        type: "POST",
+        data: JSON.stringify(sendData),
+        contentType: "application/json",
+        // data has status variable
+        success: function(data,status){
+            retVal = assembleStatus(data["status"]);
+            if(retVal==true){
+                $scope.serial = serial;
+                $scope.name = data["name"];
+                $scope.location = data["location"];
+                $scope.ap = data["ap"];
+                $scope.$apply();
+            }else{
+                alert("Server Error!");
+            }
+        }// end of getlastphotoname succes func
+    });
+}
 
 trapApp.controller('photosController', function($scope) {
 
@@ -212,5 +310,3 @@ trapApp.controller('photosController', function($scope) {
         $scope.photoIndex = index;
     };
 });
-
-

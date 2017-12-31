@@ -10,8 +10,11 @@ CHECK_USER_TRAPS_QUERY = """SELECT * FROM ServedTraps WHERE userId={}"""
 CHECK_USER_CREDENTIALS_QUERY = """SELECT * FROM Users WHERE email="{}" AND password="{}" """
 INSERT_USERS_QUERY = """INSERT INTO Users(email,password) VALUES("{}","{}")"""
 INSERT_SERVED_TRAP_QUERY = """INSERT INTO ServedTraps(serial,userId) VALUES({},{})"""
+INSERT_SERVED_TRAP2_QUERY= """INSERT INTO ServedTraps(serial,userId,name,location) VALUES({},{},"{}","{}") """
 CHECK_SERVED_TRAPS = """SELECT * FROM ServedTraps WHERE email="{}" """
 GET_USERID_QUERY = """SELECT id FROM Users WHERE email="{}" """
+GET_TRAP_DETAIL_QUERY ="""SELECT userID, name, location FROM ServedTraps WHERE serial={} """
+UPDATE_TRAP_DETAIL_QUERY = """ UPDATE  ServedTraps SET name="{name}", location="{location}" WHERE serial={serial} """
 
 def openConnection():
     try:
@@ -48,23 +51,27 @@ def checkCredential(email,password):
 def createAccount(serial,email,password):
     """ Create new Trap account
     """
-
     conn = None
     retVal = Constants.SUCCESS
 
     try:
         conn = openConnection()
-        curr = conn.cursor()
+        cur = conn.cursor()
+
+        retVal = checkAccount(cur,serial,email)
+        # if serial used or not know, warn user
+        if retVal!=Constants.SUCCESS:
+            return retVal
 
         # first create user
         query = INSERT_USERS_QUERY.format(email,password)
         print("CreateAccount:",query)
-        curr.execute(query)
+        cur.execute(query)
 
         # get created user index-id
         query = GET_USERID_QUERY.format(email)
         print("CreateAccount:",query)
-        userId = curr.execute(query).fetchone()[0]
+        userId = cur.execute(query).fetchone()[0]
                 
         if not userId:
             raise Exception
@@ -72,7 +79,7 @@ def createAccount(serial,email,password):
         # serve trap for created user
         query = INSERT_SERVED_TRAP_QUERY.format(serial,userId)
         print("CreateAccount:",query)
-        curr.execute(query)
+        cur.execute(query)
         conn.commit()
 
     except Exception as e:
@@ -86,22 +93,17 @@ def createAccount(serial,email,password):
 
     return retVal
 
-def checkAccount(serial,email):
+def checkAccount(cur,serial,email):
     """ Check if serial is valid and any one
         registered before with same email or serial number
     """
-    conn = None
     retVal =  Constants.SUCCESS
 
     try:
-        conn  = openConnection()
-        cur = conn.cursor()
-
         # check AllTraps table to check if serial valid
         query = CHECK_TRAP_SERIAL_QUERY.format(serial)
-
         qResult = cur.execute(query).fetchone() # save query result
-
+       
         # if serial not found
         if qResult==None:
             retVal = Constants.ERROR_UNK_SERIAL
@@ -118,11 +120,39 @@ def checkAccount(serial,email):
     except Exception as e:
         print("CheckAccountException:",str(e))
         retVal= Constants.ERROR_UNKNOWN
+    return retVal
 
+def addNewTrap(email,serial,name,location):
+
+    conn = None
+    retVal = Constants.SUCCESS
+    try:
+        conn = openConnection()
+        cur = conn.cursor()
+        
+        retVal = checkAccount(cur,serial,email)
+        if retVal == Constants.SUCCESS:
+            # get created user index-id
+            query = GET_USERID_QUERY.format(email)
+            print("CreateAccount:",query)
+            userId = cur.execute(query).fetchone()[0]
+                    
+            if not userId:
+                raise Exception
+
+            # serve trap for created user
+            query = INSERT_SERVED_TRAP2_QUERY.format(serial,userId,name,location)
+            print("InsertServedTrap2Query:",query)
+            cur.execute(query)
+            conn.commit()
+
+    except Exception as e:
+        print("DBHelper: addNewTrap: exception:",str(e))
+        retVal = Constants.ERROR_UNKNOWN
+        conn.rollback() # remove last changes
     finally:
         if conn:
             conn.close()
-
     return retVal
 
 def getTraps(email):
@@ -164,4 +194,47 @@ def getTraps(email):
         if conn:
             conn.close()
 
+    return retVal
+
+def getTrapDetails(serial):
+    conn = None
+    trap = None
+    try:
+        conn  = openConnection()
+        cur = conn.cursor()
+
+        query = GET_TRAP_DETAIL_QUERY.format(serial)
+        print("DBHelper: getTrapDetails: query:",query)
+        qResult = cur.execute(query).fetchone() # save query result
+   
+        # if serial not found
+        if qResult!=None:
+            trap = Constants.Trap(serial,userId=qResult[0],name=qResult[1],location=qResult[2])
+
+    except Exception as e:
+        print("CheckTraps:",str(e))
+        trap = None
+
+    finally:
+        if conn:
+            conn.close()
+
+    return trap
+
+def setTrapDetail(trap):
+    conn = None
+    retVal = Constants.SUCCESS
+    try:
+        conn  = openConnection()
+        cur = conn.cursor()
+        query = UPDATE_TRAP_DETAIL_QUERY.format(name=trap.name,location=trap.location,serial=trap.serial)
+        print("DBHelper: setTrapDetail: query:",query)
+        cur.execute(query)
+        conn.commit()
+    except Exception as e:
+        print("Exception: DBHelper: setTrapDetail:",str(e))
+        retVal = Constants.ERROR_UNKNOWN
+    finally:
+        if conn:
+            conn.close()
     return retVal
