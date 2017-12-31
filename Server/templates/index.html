@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
 
 </head>
 <body ng-app="trapApp">
@@ -26,9 +26,15 @@
                     <li role="presentation" class="dropdown">
                     <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Profile <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="#!settings">Settings</a></li>
+                        <li><a href="/#!/settings" >
+                                <span class="fa fa-cogs"></span> Settings
+                            </a>
+                        </li>
                         <li role="separator" class="divider"></li>
-                        <li><a href="logout">Log out</a></li>
+                        <li><a href="logout" >
+                                <span class="fa fa-sign-out"></span> Logout
+                            </a>
+                        </li>
                     </ul>
                     </li>
                 </ul>
@@ -51,6 +57,9 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-route.js"></script>
 
+    <!-- Font Awesome CDN -->
+    <script src="https://use.fontawesome.com/37224b3923.js"></script>
+    
     <!-- Load project based scripts -->
     <script src="/static/script.js"></script>
 

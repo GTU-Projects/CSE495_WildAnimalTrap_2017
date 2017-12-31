@@ -14,7 +14,7 @@ INSERT_SERVED_TRAP2_QUERY= """INSERT INTO ServedTraps(serial,userId,name,locatio
 CHECK_SERVED_TRAPS = """SELECT * FROM ServedTraps WHERE email="{}" """
 GET_USERID_QUERY = """SELECT id FROM Users WHERE email="{}" """
 GET_TRAP_DETAIL_QUERY ="""SELECT userID, name, location FROM ServedTraps WHERE serial={} """
-UPDATE_TRAP_DETAIL_QUERY = """ UPDATE  ServedTraps SET name="{name}", location="{location}" """
+UPDATE_TRAP_DETAIL_QUERY = """ UPDATE  ServedTraps SET name="{name}", location="{location}" WHERE serial={serial} """
 
 def openConnection():
     try:
@@ -227,8 +227,7 @@ def setTrapDetail(trap):
     try:
         conn  = openConnection()
         cur = conn.cursor()
-
-        query = UPDATE_TRAP_DETAIL_QUERY.format(name=trap.name,location=trap.location)
+        query = UPDATE_TRAP_DETAIL_QUERY.format(name=trap.name,location=trap.location,serial=trap.serial)
         print("DBHelper: setTrapDetail: query:",query)
         cur.execute(query)
         conn.commit()
@@ -238,5 +237,4 @@ def setTrapDetail(trap):
     finally:
         if conn:
             conn.close()
-
     return retVal

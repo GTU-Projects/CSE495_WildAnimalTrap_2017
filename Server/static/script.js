@@ -53,10 +53,19 @@ trapApp.config(function($routeProvider) {
             controller  : 'photosController'
         })
 
+        .when('/settings', {
+            templateUrl : '/static/partials/settings.html',
+            controller  : 'settingsController'
+        })
+
 });
 
 trapApp.controller('aboutController', function($scope) {
     $scope.message = 'About Hasan Men ...';
+});
+
+trapApp.controller('settingsController', function($scope) {
+    $scope.message = 'Settings here';
 });
 
 trapApp.controller('trapsController', function($scope,$http) {
@@ -202,7 +211,7 @@ trapApp.controller('trapDetailController', function($scope) {
         });
     };// end of take photo function
 
-    //loadLastPhoto($scope,currTrapSerial);
+    loadLastPhoto($scope,currTrapSerial);
 });
 
 function loadLastPhoto($scope,serial){
@@ -227,7 +236,7 @@ function loadLastPhoto($scope,serial){
 
                 $scope.$apply(); // update angular
             }else{
-                alert(retVal);
+                // ıf not success, could't find any image
             }
         }// end of getlastphotoname succes func
     });

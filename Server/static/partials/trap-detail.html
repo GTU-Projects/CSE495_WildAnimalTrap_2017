@@ -18,7 +18,9 @@
     <div class="row">
         <div class="col-md-12">
             <!-- Trigger the modal with a button -->
-            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#newTrapDetailModal">Edit Trap Details</button>
+            <a class="btn btn-info btn-lg" data-toggle="modal" data-target="#newTrapDetailModal">
+                    <span class="fa fa-pencil-square-o"></span> Edit Trap Details
+            </a>
         </div>
         <!-- Modal -->
         <div id="newTrapDetailModal" class="modal fade" role="dialog">
@@ -48,18 +50,31 @@
     <h3><span class="font-weight-bold">Controls</span></h3>
     <div class="row">
         <div class="col-md-3">
-            <a class="btn btn-info btn-lg" ng-click="takePhoto()">
-                <span class="glyphicon glyphicon-camera"></span> Take Photo
-            </a>
-        </div>
-        <div class="col-md-3">
             <a class="btn btn-info btn-lg" ng-click="setDoor(0)">
-                <span class="glyphicon glyphicon-lock"></span> Open Door
+                <span class="fa fa-unlock"></span> Open Door
             </a>
         </div>
         <div class="col-md-3">
             <a class="btn btn-info btn-lg" ng-click="setDoor(1)">
-                <span class="glyphicon glyphicon-lock"></span> Close Door
+                <span class="fa fa-lock"></span> Close Door
+            </a>
+        </div>
+        <div class="col-md-3">
+                <a class="btn btn-info btn-lg" ng-click="setDoor(1)">
+                    <span class="glyphicon glyphicon-chevron-right"></span> Push Bait
+                </a>
+        </div>
+        <div class="col-md-3">
+                <a class="btn btn-info btn-lg" ng-click="setDoor(1)">
+                    <span class="glyphicon glyphicon-chevron-left"></span> Pull Bait
+                </a>
+        </div>
+    </div>
+    <br><br>
+    <div class="row">
+        <div class="col-md-3">
+            <a class="btn btn-info btn-lg" ng-click="takePhoto()">
+                <span class="glyphicon glyphicon-camera"></span> Take Photo
             </a>
         </div>
         <div class="col-md-3">
