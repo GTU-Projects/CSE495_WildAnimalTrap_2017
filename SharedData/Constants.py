@@ -29,5 +29,18 @@ GPIO_PIN_DC_1 = 20
 GPIO_PIN_DC_2 = 21
 GPIO_PIN_DC_PWM = 18
 
+class Trap():
+    def __init__(self,serial,userId,name,location):
+        self.serial=serial
+        self.userId=userId
+        self.location=location
+        self.name=name
+        # active/passive state
+        self.ap = 1
+
+    def __str__(self):
+        str = "Serial:{}, UserId:{}, Name:{}, Location:{}"
+        return str.format(self.serial,self.userId,self.name,self.location)
+
 
 

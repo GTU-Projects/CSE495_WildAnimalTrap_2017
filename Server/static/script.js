@@ -115,11 +115,7 @@ trapApp.controller('trapDetailController', function($scope) {
 
     currTrapSerial = document.cookie
 
-    $scope.status = 'Online';
-    $scope.name="x";
-    // save trap serial in cookie to use in trap special pages 
-    $scope.serial = currTrapSerial;
-    $scope.location = "x";
+    loadTrapDetails($scope,currTrapSerial);
 
     // TODO: change activeTrapSerial variable
     $scope.setDoor = function(nextState){
@@ -205,10 +201,10 @@ trapApp.controller('trapDetailController', function($scope) {
         });
     };// end of take photo function
 
-    updateLastPhoto($scope,currTrapSerial);
+    //loadLastPhoto($scope,currTrapSerial);
 });
 
-function updateLastPhoto($scope,serial){
+function loadLastPhoto($scope,serial){
 
     sendData = {"serial":serial};
 
@@ -231,6 +227,31 @@ function updateLastPhoto($scope,serial){
                 $scope.$apply(); // update angular
             }else{
                 alert(retVal);
+            }
+        }// end of getlastphotoname succes func
+    });
+}
+
+function loadTrapDetails($scope,serial){
+
+    sendData = {"serial":serial};
+
+    $.ajax({
+        url: "getTrapDetails",
+        type: "POST",
+        data: JSON.stringify(sendData),
+        contentType: "application/json",
+        // data has status variable
+        success: function(data,status){
+            retVal = assembleStatus(data["status"]);
+            if(retVal==true){
+                $scope.serial = serial;
+                $scope.name = data["name"];
+                $scope.location = data["location"];
+                $scope.ap = data["ap"];
+                $scope.$apply();
+            }else{
+                alert("Server Error!");
             }
         }// end of getlastphotoname succes func
     });

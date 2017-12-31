@@ -47,12 +47,6 @@ createFlaskApp()
 class User(flask_login.UserMixin):
     def __init__(self,id):
         self.id=id
-
-class Trap():
-    def __init__(self,serial,userId,location):
-        self.serial=serial
-        self.userId=userId
-        self.location=location
     
 @login_manager.user_loader
 def user_loader(email):
@@ -213,6 +207,28 @@ def getPhotoPaths():
     except Exception as e:
         status = Constants.ERROR_UNKNOWN
         return flask.jsonify({"status":status})
+
+@app.route("/getTrapDetails",methods=["POST"])
+@flask_login.login_required
+def getTrapDetails():
+    try:
+        print()
+        req = flask.request.get_json()
+        serial = req["serial"]
+
+        trap = DBHelper.getTrapDetails(serial)
+        if trap == None:
+            raise Exception
+
+        print("main: getTrapDetails: trap:",str(trap))
+        return flask.jsonify({"status":Constants.SUCCESS,
+                            "name":trap.name,
+                            "location":trap.location,
+                            "ap":trap.ap})
+    except Exception as e:
+        print("Exception: main: getTrapDetails:",str(e))
+        return flask.jsonify({"status":Constants.ERROR_UNKNOWN})
+
 
 @app.route("/setTrapDetail",methods=["POST"])
 @flask_login.login_required

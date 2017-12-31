@@ -13,6 +13,7 @@ INSERT_SERVED_TRAP_QUERY = """INSERT INTO ServedTraps(serial,userId) VALUES({},{
 INSERT_SERVED_TRAP2_QUERY= """INSERT INTO ServedTraps(serial,userId,name,location) VALUES({},{},"{}","{}") """
 CHECK_SERVED_TRAPS = """SELECT * FROM ServedTraps WHERE email="{}" """
 GET_USERID_QUERY = """SELECT id FROM Users WHERE email="{}" """
+GET_TRAP_DETAIL_QUERY ="""SELECT userID, name, location FROM ServedTraps WHERE serial={} """
 
 def openConnection():
     try:
@@ -193,3 +194,29 @@ def getTraps(email):
             conn.close()
 
     return retVal
+
+
+def getTrapDetails(serial):
+    conn = None
+    trap = None
+    try:
+        conn  = openConnection()
+        cur = conn.cursor()
+
+        query = GET_TRAP_DETAIL_QUERY.format(serial)
+        print("DBHelper: getTrapDetails: query:",query)
+        qResult = cur.execute(query).fetchone() # save query result
+   
+        # if serial not found
+        if qResult!=None:
+            trap = Constants.Trap(serial,userId=qResult[0],name=qResult[1],location=qResult[2])
+
+    except Exception as e:
+        print("CheckTraps:",str(e))
+        trap = None
+
+    finally:
+        if conn:
+            conn.close()
+
+    return trap
