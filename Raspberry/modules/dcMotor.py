@@ -34,7 +34,7 @@ class DCMotor():
         GPIO.output(self.pin1,0)
         GPIO.output(self.pin2,0)
         
-        if isPWMOpen:
+        if self.isPWMOpen:
             GPIO.output(self.pinPWM,0)
             self.pwm.stop()
 
@@ -58,7 +58,8 @@ class DCMotor():
 
         for i in range(0,5):
             self.turnLeft()
-            time.sleep(2)
+            time.sleep(10)
+            return
             self.turnRight()
             time.sleep(2)
         self.stop()

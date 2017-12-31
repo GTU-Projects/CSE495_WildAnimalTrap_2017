@@ -32,28 +32,28 @@ class MB11_stepper():
     def turnLeft(self):
         """ Turn motor 1 complete step to left
         """
-        print("G1")
+        #print("G1")
         GPIO.output(self.gBottom,1)
         GPIO.output(self.yBottom,0)
         GPIO.output(self.gTop,0)
         GPIO.output(self.yTop,0)
         time.sleep(self.stepDelay)
 
-        print("G2")
+        #print("G2")
         GPIO.output(self.gBottom,0)
         GPIO.output(self.yBottom,0)
         GPIO.output(self.gTop,1)
         GPIO.output(self.yTop,0)
         time.sleep(self.stepDelay)
 
-        print("S1")
+        #print("S1")
         GPIO.output(self.gBottom,0)
         GPIO.output(self.yBottom,1)
         GPIO.output(self.gTop,0)
         GPIO.output(self.yTop,0)
         time.sleep(self.stepDelay)
 
-        print("S2")
+        #print("S2")
         GPIO.output(self.gBottom,0)
         GPIO.output(self.yBottom,0)
         GPIO.output(self.gTop,0)

@@ -12,7 +12,7 @@ tQue = queue.Queue()
 rQue = queue.Queue()
 
 class NetworkThread(threading.Thread):
-    def __init__(self,ip="138.197.121.142",port="5669",serial=95, useGPRS=False):
+    def __init__(self,ip="138.197.121.142",port=5669,serial=95, useGPRS=False):
         threading.Thread.__init__(self)
 
         # serial number for authentication of server-trap connection
@@ -75,13 +75,13 @@ class NetworkThread(threading.Thread):
                             cmd = int(cmd)
                             if cmd==Constants.REQ_OPEN_DOOR:
                                 print("OpenDoor")
-                                self.comInt.send2Socket(b'7')
+                                self.comInt.send2Socket(b'07')
                             elif cmd==Constants.REQ_CLOSE_DOOR:
                                 print("CloseDoor")
-                                self.comInt.send2Socket(b'8')
+                                self.comInt.send2Socket(b'08')
                             elif cmd==Constants.REQ_PULL_BAIT:
                                 print("Pull Bait")
-                                self.comInt.send2Socket(b'9')
+                                self.comInt.send2Socket(b'09')
                             elif cmd==Constants.REQ_PUSH_BAIT:
                                 print("Push Bait")
                                 self.comInt.send2Socket(b'10')
@@ -90,6 +90,7 @@ class NetworkThread(threading.Thread):
                                 # byte array to send over socket
                                 photoName = self.cam.getFrame()
                                 photo = getPhotoByteArray(photoName)
+                                print("PhotoSize:",len(photo))
                                 # first send photo code, name and photo
                                 self.comInt.send2Socket(b'11')
                                 self.comInt.send2Socket(photoName.encode())
