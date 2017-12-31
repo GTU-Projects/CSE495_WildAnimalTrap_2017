@@ -1,11 +1,11 @@
 import flask
 import flask_login
 import json
-import sys, os
+import sys, os, glob
 
 from db import DBHelper
-from modules import comHelper
-from modules.client_thread import trapThreads
+#from modules import comHelper
+#from modules.client_thread import trapThreads
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 PROJECT_PATH = os.path.dirname(PATH)
@@ -61,22 +61,17 @@ def user_loader(email):
 @app.route("/signup",methods=["GET","POST"])
 def sigup():
     try:
+
         data = flask.request.get_json()
 
         serial = data["serial"]
         email = data["email"]
         password = data["password"]
 
-
-        retVal = DBHelper.checkAccount(serial,email)
-        # if serial used or not know, warn user
+        retVal = DBHelper.createAccount(serial,email,password)
         if retVal!=Constants.SUCCESS:
             return flask.jsonify({"status":retVal})
 
-        # if creates return success otherwise return error
-        retVal = DBHelper.createAccount(serial,email,password)
-
-        
         os.mkdir(trapDataDirPath+"/"+serial)
 
         return flask.jsonify({"status":retVal})
@@ -86,7 +81,6 @@ def sigup():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    
     try:
         if flask.request.method == 'POST':
             data = flask.request.get_json()
@@ -105,10 +99,8 @@ def login():
                 return  flask.jsonify({"status":Constants.ERROR_WRONG_EMAIL_PASS})
             else: # unknwon server error
                 return flask.jsonify({"status":Constants.ERROR_UNKNOWN})
-
     except Exception as e:
         print("Exception:",str(e))
-
     return flask.render_template('login.html')
 
 @app.route('/logout')
@@ -132,7 +124,7 @@ def getTraps():
     trapsArray = Constants.SUCCESS
     try:
         trapsArray = DBHelper.getTraps(flask_login.current_user.id)
-        print("AllTraps:",trapsArray)
+        print("getTraps:",trapsArray)
     except Excetion as e:
         print("GetTraps:",str(e))
         trapsArray = Constants.ERROR_UNKNOWN
@@ -172,7 +164,6 @@ def setDoor():
     print("NextStat:",nextState)
     return flask.jsonify({"status":status,"nextState":nextState})
 
-
 @app.route("/takePhoto",methods=["POST"])
 @flask_login.login_required
 def takePhoto():
@@ -182,6 +173,7 @@ def takePhoto():
         serial = req["serial"]
 
         retVal = socketThread.sendReq2Trap(serial,Constants.REQ_TAKE_PHOTO)
+        print("TakePhoto retVal:",retVal)
         if retVal == Constants.ERROR_CONNECTION:
             status = Constants.ERROR_CONNECTION
         else:
@@ -191,7 +183,6 @@ def takePhoto():
         status = Constants.ERROR_UNKNOWN
     return flask.jsonify({"status":status})
 
-
 @app.route("/getLastPhotoName",methods=["POST"])
 @flask_login.login_required
 def getLastPhotoName():
@@ -199,10 +190,14 @@ def getLastPhotoName():
         data = flask.request.get_json()
         serial = data["serial"]
 
-        return flask.jsonify({"status":Constants.SUCCESS,"name":"2017-12-17_22:11:43.515418.jpg"})
+        path = "./static/.trapData/"+str(serial)+"/"
+        # get last created/touched file name
+        list_of_files = glob.glob(path+"*")
+        latest_file = max(list_of_files, key=os.path.getctime)
+        latest_file = latest_file.replace(path,"")
+        return flask.jsonify({"status":Constants.SUCCESS,"name":latest_file})
     except:
         return flask.jsonify({"status":Constants.ERROR_UNKNOWN})
-
 
 @app.route("/getPhotoPaths",methods=["POST"])
 @flask_login.login_required
@@ -219,6 +214,38 @@ def getPhotoPaths():
         status = Constants.ERROR_UNKNOWN
         return flask.jsonify({"status":status})
 
+@app.route("/setTrapDetail",methods=["POST"])
+@flask_login.login_required
+def setTrapDetail():
+    status = Constants.SUCCESS
+    try:
+        req = flask.request.get_json()
+        serial = req["serial"]
+        name = req["name"]
+        location = req["location"]
+        return flask.jsonify({"status":status})
+    except Exception as e:
+        status = Constants.ERROR_UNKNOWN
+        return flask.jsonify({"status":status})
+
+@app.route("/addNewTrap",methods=["POST"])
+@flask_login.login_required
+def addNewTrap():
+    retVal = Constants.SUCCESS
+    try:
+        req = flask.request.get_json()
+        serial = req["serial"]
+        name = req["name"]
+        location = req["location"]
+        email = flask_login.current_user.id
+        print(serial,name,location,email)
+
+        retVal = DBHelper.addNewTrap(email,serial,name,location)
+    except Exception as e:
+        print("Exception: main: addNewTrap:"+str(e))
+        retVal = Constants.ERROR_UNKNOWN
+
+    return flask.jsonify({"status":retVal})
 
 # you can access active trap connections with
 # trap = socketThread.connections[ipAddress]
@@ -231,9 +258,10 @@ if __name__ == "__main__":
             print("Trap Data Directory created.")
         # listen socket and create thread for each trap
         # all trap communication will be served over connection helper
-        socketThread = comHelper.ServerConnHelperThread(5669)
-        socketThread.setDaemon(True)
-        socketThread.start()
+        # TODO: remove comments
+        #socketThread = comHelper.ServerConnHelperThread(5669)
+        #socketThread.setDaemon(True)
+        #socketThread.start()
 
         app.run(host="0.0.0.0", port=5000)
         

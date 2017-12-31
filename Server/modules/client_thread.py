@@ -4,6 +4,7 @@ import logging
 import queue
 import sys,os
 from datetime import datetime as date
+import YOLOHelper
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)-20s - %(levelname)-10s - %(threadName)-10s - %(message)s',
@@ -12,6 +13,8 @@ logging.basicConfig(level=logging.DEBUG,
 PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 trapThreads = {}
+
+detector = YOLOHelper.loadDetector()
 
 class ClientData():
     """ Store client socket, thread and ip address
@@ -29,7 +32,8 @@ class TrapServiceThread(threading.Thread):
         threading.Thread.__init__(self)
         self.threadDoneFlag=False
 
-        socket.settimeout(5.0)
+        # TODO: increate timeout for dicrease network control interval
+        socket.settimeout(2.0)
         self.trapData = ClientData(ip,socket,self,rQue, tQue)
 
         self.logger = logging.getLogger("ClientThread["+str(ip)+"]")
@@ -41,7 +45,7 @@ class TrapServiceThread(threading.Thread):
         serial = self.trapData.socket.recv(256) # read serial number first
         serial = str(serial.decode("UTF-8"))
         
-        self.trapData.socket.send(b'A') # send acknowledge message to trap
+        self.trapData.socket.send(b'0') # send acknowledge message to trap
         print("Trap:",serial,"connected")
         # TODO: if serial is valid ...
 
@@ -56,18 +60,36 @@ class TrapServiceThread(threading.Thread):
                 buffer = None
                 try:
                     # if timeout occur, throw timeout exception
-                    buffer = self.trapData.socket.recv(1024*1024)
-                    if buffer:
-                        fileName = str(date.now()).replace(" ","_")
-                        photoPath = PATH+"/static/.trapData/"+serial+"/"+fileName+".jpg"
+                    buffer = self.trapData.socket.recv(2)
+                    if buffer == b'11':
+                        # 2017-12-26_19.29.22.jpg = 23byte
+                        filename = self.trapData.socket.recv(23)
+                        photoPath = PATH+"/static/.trapData/"+serial+"/"+filename.decode("UTF-8")
                         print("Photo will be saved at:",photoPath)
-                        # write image to file and send complete message to flask rest
+                            # write image to file and send complete message to flask rest
+
+                        photo = None
+                        photoPacketSize = 1024
+                        t = self.trapData.socket.recv(photoPacketSize)
+                        if t:
+                            photo = t
+                            while len(t)>=photoPacketSize:
+                                time.sleep(0.05)
+                                t = self.trapData.socket.recv(photoPacketSize)
+                                photo += t
+                        print("PhotoLen:",len(photo))
                         with open(photoPath,"wb") as f:
-                            f.write(buffer)
+                            f.write(photo)
                             os.sync() # direct write to disk
                             print("PhotoSaved:",photoPath)
-                        self.trapData.rQue.put(fileName)
-                        continue
+                        self.trapData.rQue.put(filename)
+
+                        print("Analyzing photo")
+                        print("Results:#############")
+                        print(YOLOHelper.detectPhoto(detector,photoPath))
+                        print("#############")
+
+                    continue
 
                 except Exception as e:
                     buffer = None

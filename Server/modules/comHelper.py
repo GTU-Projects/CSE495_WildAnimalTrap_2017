@@ -66,7 +66,6 @@ class ServerConnHelperThread(threading.Thread):
                 self.perTrapThreads.append(clientThread)
                 clientThread.setDaemon(True)
                 clientThread.start()
-
             except Exception as e:
                 print("ServerConnHelperThread, run, exception:",str(e))
 
@@ -76,7 +75,7 @@ class ServerConnHelperThread(threading.Thread):
         try:
             self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.sock.bind((socket.gethostbyname("localhost"),self.port))
+            self.sock.bind(("0.0.0.0",self.port))
             self.sock.listen(self.MAX_LISTEN_LEN)
             self.isPortOpened=True
             logger.info("Connection opened.")

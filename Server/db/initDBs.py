@@ -26,6 +26,9 @@ def initialize():
 	cur.execute("""
 		INSERT INTO AllTraps(serial) VALUES(95)
 	""")
+	cur.execute("""
+		INSERT INTO AllTraps(serial) VALUES(56)
+	""")
 	conn.commit()
 
 	cur.execute("""

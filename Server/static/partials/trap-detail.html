@@ -17,9 +17,31 @@
     <br><br>
     <div class="row">
         <div class="col-md-12">
-            <a href="" class="btn btn-info btn-lg" >
-                <span class="glyphicon glyphicon-pencil"></span> Edit
-            </a>
+            <!-- Trigger the modal with a button -->
+            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#newTrapDetailModal">Edit Trap Details</button>
+        </div>
+        <!-- Modal -->
+        <div id="newTrapDetailModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Update Trap Details</h4>
+                </div>
+                <div class="modal-body">
+                    <label for="trapName">Trap Name:</label>
+                    <input name="trapName" id="newTrapName" type="text" class="form-control" placeholder="{{name}}">
+                    <label for="trapLocation">Trap Location:</label>
+                    <input name="trapLocation" id="newTrapLocation" type="text" class="form-control" placeholder="{{location}}">
+                    <p id="newTrapMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" ng-click="setTrapDetail()">Save</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
         </div>
     </div>
     <br><br>

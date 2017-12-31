@@ -1,5 +1,4 @@
 //'use strict';
-
 function assembleStatus(status){
     if(status==0){
         return true;
@@ -56,11 +55,9 @@ trapApp.config(function($routeProvider) {
 
 });
 
-
 trapApp.controller('aboutController', function($scope) {
     $scope.message = 'About Hasan Men ...';
 });
-
 
 trapApp.controller('trapsController', function($scope,$http) {
 
@@ -73,6 +70,45 @@ trapApp.controller('trapsController', function($scope,$http) {
         document.cookie=serial;
         $(location).attr('href',"/#!/trap-detail");
     };
+
+    $scope.addNewTrap = function(){
+        newTrapSerial = $("#newTrapSerial").val()
+        newTrapName = $("#newTrapName").val()
+        newTrapLocation = $("#newTrapLocation").val()
+
+        if(newTrapSerial=="" || newTrapName=="" || newTrapLocation==""){
+            $("#addNewTrapMessage").text("Please fill all blanks.");
+            return;
+        }
+
+        sendData = {
+            "serial":newTrapSerial,
+            "name":newTrapName,
+            "location":newTrapLocation
+        };
+
+        $.ajax({
+            url: "addNewTrap",
+            type: "POST",
+            data: JSON.stringify(sendData),
+            contentType: "application/json",
+            // data has status variable
+            success: function(data,status){
+                retVal = assembleStatus(data["status"]);
+                if(retVal==true){
+                    $("#addNewTrapMessage").text("Trap successfully was added.");
+                    // update trap list
+                    $http.post('/getTraps').then(function(response){
+                        $scope.traps =response.data;
+                        $scope.$apply(); // update angular
+                    });
+                }else{
+                    $("#addNewTrapMessage").text(retVal);
+                }
+            }
+        });
+
+    }
 });
 
 trapApp.controller('trapDetailController', function($scope) {
@@ -113,6 +149,41 @@ trapApp.controller('trapDetailController', function($scope) {
         });
     };
 
+    $scope.setTrapDetail = function(){
+        
+        newTrapName = $("#newTrapLocation").val()
+        newTrapLocation = $("#newTrapLocation").val()
+
+        if(newTrapName=="" || newTrapLocation==""){
+            $("#newTrapMessage").text("Please fill all blanks");
+            return;
+        }
+
+        sendData = {
+            "serial":currTrapSerial,
+            "name":newTrapName,
+            "location":newTrapLocation
+        };
+
+        $.ajax({
+            url: "setTrapDetail",
+            type: "POST",
+            data: JSON.stringify(sendData),
+            contentType: "application/json",
+            // data has status variable
+            success: function(data,status){
+                retVal = assembleStatus(data["status"]);
+                if(retVal==true){
+                    alert("success");
+                    $scope.name = newTrapName;
+                    $scope.location = newTrapLocation;
+                }else{
+                    alert("Error:"+retVal);
+                }
+            }
+        });
+    };// end of set trap detail function
+
     $scope.takePhoto = function(){
 
         sendData = {"serial":currTrapSerial}
@@ -124,7 +195,6 @@ trapApp.controller('trapDetailController', function($scope) {
             contentType: "application/json",
             // data has status variable
             success: function(data,status){
-                
                 retVal = assembleStatus(data["status"]);
                 if(retVal==true){
                     updateLastPhoto($scope,currTrapSerial);
@@ -133,11 +203,9 @@ trapApp.controller('trapDetailController', function($scope) {
                 }
             }// end of takephoto success func
         });
-    };
-
+    };// end of take photo function
 
     updateLastPhoto($scope,currTrapSerial);
-
 });
 
 function updateLastPhoto($scope,serial){
@@ -167,7 +235,6 @@ function updateLastPhoto($scope,serial){
         }// end of getlastphotoname succes func
     });
 }
-
 
 trapApp.controller('photosController', function($scope) {
 
@@ -212,5 +279,3 @@ trapApp.controller('photosController', function($scope) {
         $scope.photoIndex = index;
     };
 });
-
-
