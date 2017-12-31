@@ -229,16 +229,19 @@ def getTrapDetails():
         print("Exception: main: getTrapDetails:",str(e))
         return flask.jsonify({"status":Constants.ERROR_UNKNOWN})
 
-
 @app.route("/setTrapDetail",methods=["POST"])
 @flask_login.login_required
 def setTrapDetail():
     status = Constants.SUCCESS
     try:
         req = flask.request.get_json()
-        serial = req["serial"]
-        name = req["name"]
-        location = req["location"]
+
+        trap = Constants.Trap(serial = req["serial"],
+                                name=req["name"],
+                                location =req["location"])
+
+        status = DBHelper.setTrapDetail(trap)
+
         return flask.jsonify({"status":status})
     except Exception as e:
         status = Constants.ERROR_UNKNOWN

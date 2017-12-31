@@ -30,7 +30,7 @@ GPIO_PIN_DC_2 = 21
 GPIO_PIN_DC_PWM = 18
 
 class Trap():
-    def __init__(self,serial,userId,name,location):
+    def __init__(self,serial=None,userId=None,name=None,location=None):
         self.serial=serial
         self.userId=userId
         self.location=location

@@ -147,11 +147,11 @@ trapApp.controller('trapDetailController', function($scope) {
 
     $scope.setTrapDetail = function(){
         
-        newTrapName = $("#newTrapLocation").val()
+        newTrapName = $("#newTrapName").val()
         newTrapLocation = $("#newTrapLocation").val()
 
         if(newTrapName=="" || newTrapLocation==""){
-            $("#newTrapMessage").text("Please fill all blanks");
+            $("#editTrapMessage").text("Please fill all blanks!");
             return;
         }
 
@@ -170,11 +170,12 @@ trapApp.controller('trapDetailController', function($scope) {
             success: function(data,status){
                 retVal = assembleStatus(data["status"]);
                 if(retVal==true){
-                    alert("success");
+                    $("#editTrapMessage").text("Details were chaned."); 
                     $scope.name = newTrapName;
                     $scope.location = newTrapLocation;
+                    $scope.$apply();
                 }else{
-                    alert("Error:"+retVal);
+                    $("#editTrapMessage").text("Error:"+retVal); 
                 }
             }
         });
