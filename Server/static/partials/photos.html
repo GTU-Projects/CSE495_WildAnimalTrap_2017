@@ -1,14 +1,38 @@
 <!-- photos.html -->
 <div class="jumbotron text-center">
         <!-- enumerate all photos -->
-        <a class="arrow prev" ng-click="showPrev()">Prev</a>
-        <div ng-repeat="photo in photos">
-            <img witdh="300" height="300" class="slide" ng-show="isActive($index)" ng-src="{{photo.src}}" />
-            <div class="caption" ng-show="isActive($index)">
-                <p>{{photo.desc}}</p>
+        <div class="row">
+            <div class="col-md-8">
+                <a class="arrow prev" ng-click="showPrev()">Prev</a>
+                <div ng-repeat="photo in photos">
+                    <img witdh="300" height="300" class="slide" ng-show="isActive($index)" ng-src="{{photo.src}}" />
+                    <div class="caption" ng-show="isActive($index)">
+                        <p>{{photo.desc}}</p>
+                    </div>
+                </div>
+                <a class="arrow next" ng-click="showNext()">Next</a>
+            </div>
+            <div class="col-md-4">
+                <div class="table-responsive">
+                    <table data-toggle="table" class="table">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Class</th>
+                            <th>Probability</th>
+                        </tr>
+                        </thead>
+                        <tbody id="GuessTableBody">
+                        <tr ng-repeat="guess in guesses">
+                            <td>{{$index+1}}</td>
+                            <td>{{guess.class}}</td>
+                            <td>{{guess.prob}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-        <a class="arrow next" ng-click="showNext()">Next</a>
         <div class="row">
             <div class="list-group list-group-horizontal" >
                 <figure class="list-group-item col-md-2" ng-repeat="photo in photos" class="figure">

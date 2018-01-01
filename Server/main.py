@@ -4,8 +4,7 @@ import json
 import sys, os, glob
 
 from db import DBHelper
-#from modules import comHelper
-#from modules.client_thread import trapThreads
+from modules import comHelper
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 PROJECT_PATH = os.path.dirname(PATH)
@@ -186,7 +185,8 @@ def getLastPhotoName():
 
         path = "./static/.trapData/"+str(serial)+"/"
         # get last created/touched file name
-        list_of_files = glob.glob(path+"*")
+        list_of_files = glob.glob(path+"*.jpg")
+        print(list_of_files)
         latest_file = max(list_of_files, key=os.path.getctime)
         latest_file = latest_file.replace(path,"")
         return flask.jsonify({"status":Constants.SUCCESS,"name":latest_file})
@@ -200,9 +200,7 @@ def getPhotoPaths():
     try:
         req = flask.request.get_json()
         serial = req["serial"]
-
-        fileList = os.listdir(trapDataDirPath+"/"+serial)
-        print(fileList)
+        fileList = [ f for f in os.listdir(trapDataDirPath+"/"+serial) if f.endswith(".jpg")]
         return flask.jsonify({"status":status,"paths":fileList})
     except Exception as e:
         status = Constants.ERROR_UNKNOWN
@@ -212,7 +210,6 @@ def getPhotoPaths():
 @flask_login.login_required
 def getTrapDetails():
     try:
-        print()
         req = flask.request.get_json()
         serial = req["serial"]
 
@@ -266,6 +263,29 @@ def addNewTrap():
 
     return flask.jsonify({"status":retVal})
 
+@app.route("/getImageGuesses",methods=["POST"])
+@flask_login.login_required
+def getImageGuesses():
+    try:
+        req = flask.request.get_json()
+        serial = req["serial"]
+
+        filePath = trapDataDirPath+"/"+serial+"/guesses.json"
+
+        res = {}
+        with open(filePath,"r") as f:
+            res = json.load(f)
+        print(res)
+        return flask.jsonify({"status":Constants.SUCCESS,
+                                "guesses":res})
+
+    except Exception as e:
+        print("Exception: main: getImageGuesses:",str(e))
+        return flask.jsonify({"status":Constants.ERROR_UNKNOWN})
+
+
+
+
 # you can access active trap connections with
 # trap = socketThread.connections[ipAddress]
 # trap.socket, trap.thread ...
@@ -278,9 +298,9 @@ if __name__ == "__main__":
         # listen socket and create thread for each trap
         # all trap communication will be served over connection helper
         # TODO: remove comments
-        #socketThread = comHelper.ServerConnHelperThread(5669)
-        #socketThread.setDaemon(True)
-        #socketThread.start()
+        socketThread = comHelper.ServerConnHelperThread(5669)
+        socketThread.setDaemon(True)
+        socketThread.start()
 
         app.run(host="0.0.0.0", port=5000)
         

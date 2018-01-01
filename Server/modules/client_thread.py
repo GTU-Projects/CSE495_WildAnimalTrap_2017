@@ -3,6 +3,8 @@ import time
 import logging
 import queue
 import sys,os
+import json
+import socket
 from datetime import datetime as date
 import YOLOHelper
 
@@ -85,13 +87,28 @@ class TrapServiceThread(threading.Thread):
                         self.trapData.rQue.put(filename)
 
                         print("Analyzing photo")
-                        print("Results:#############")
-                        print(YOLOHelper.detectPhoto(detector,photoPath))
-                        print("#############")
+                        results = YOLOHelper.detectPhoto(detector,photoPath)
 
+                        data = {}
+                        jsonPath = PATH+"/static/.trapData/"+serial+"/guesses.json"
+
+                        # if file already exist, add new results onto the old ones.
+                        if os.path.exists(jsonPath):
+                            with open(jsonPath,"r") as f:
+                                data = json.load(f)
+
+                        data[filename.decode("UTF-8")]=results
+
+                        with open(jsonPath,"w") as f:
+                            f.write(json.dumps(data))
+                            os.sync()
+                        print("client_thread: TrapServiceThread: run: photo saved.")
                     continue
 
+                except socket.timeout: # if there is no new request from server
+                    pass
                 except Exception as e:
+                    print("Exception: client_thread: run:",str(e))
                     buffer = None
 
                 # no coming request, send new user request to rpi if exist

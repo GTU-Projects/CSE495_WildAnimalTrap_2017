@@ -5,8 +5,8 @@ import threading
 import queue
 import Constants
 import traceback
-from client_thread import TrapServiceThread 
-from client_thread import trapThreads
+from client_thread import TrapServiceThread, trapThreads
+
 
 logger = logging.getLogger("ConnectionHelper")
 logger.setLevel(logging.DEBUG)

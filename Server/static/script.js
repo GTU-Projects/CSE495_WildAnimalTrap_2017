@@ -120,7 +120,7 @@ trapApp.controller('trapsController', function($scope,$http) {
     }
 });
 
-trapApp.controller('trapDetailController', function($scope) {
+trapApp.controller('trapDetailController', function($scope,$http) {
 
     currTrapSerial = document.cookie
 
@@ -203,18 +203,19 @@ trapApp.controller('trapDetailController', function($scope) {
             success: function(data,status){
                 retVal = assembleStatus(data["status"]);
                 if(retVal==true){
-                    updateLastPhoto($scope,currTrapSerial);
+                    loadLastPhoto($scope,$http,currTrapSerial);                    
                 }else{
                     alert("Error:"+retVal);
                 }
+
             }// end of takephoto success func
         });
     };// end of take photo function
 
-    loadLastPhoto($scope,currTrapSerial);
+    loadLastPhoto($scope,$http,currTrapSerial);
 });
 
-function loadLastPhoto($scope,serial){
+function loadLastPhoto($scope,$http,serial){
 
     sendData = {"serial":serial};
 
@@ -233,6 +234,22 @@ function loadLastPhoto($scope,serial){
 
                 $scope.lastPhotoSrc = item["src"];
                 $scope.lastPhotoDesc = item["desc"];
+
+                // get photo guesses
+                $.ajax({
+                    url: "/getImageGuesses",
+                    type: "POST",
+                    data: JSON.stringify(sendData),
+                    contentType: "application/json",
+                    // data has status variable
+                    success: function(data,status){
+                        retVal = assembleStatus(data["status"]);
+                        if(retVal==true){
+                            $scope.guesses =data["guesses"][name];
+                            $scope.$apply(); // update angular
+                        }
+                    }// end of getlastphotoname succes func
+                });
 
                 $scope.$apply(); // update angular
             }else{
@@ -267,6 +284,7 @@ function loadTrapDetails($scope,serial){
     });
 }
 
+ImageGuesses = {}
 trapApp.controller('photosController', function($scope) {
 
     serial = document.cookie
@@ -286,8 +304,26 @@ trapApp.controller('photosController', function($scope) {
                 //alert(photoPath);
                 item = {src:photoPath,desc:data["paths"][i]};
                 $scope.photos.push(item);
-                //alert($scope.photos[i]["src"]);
             }
+
+            $.ajax({
+                url: "/getImageGuesses",
+                type: "POST",
+                data: JSON.stringify(sendData),
+                contentType: "application/json",
+                // data has status variable
+                success: function(data,status){
+                    retVal = assembleStatus(data["status"]);
+                    if(retVal==true){
+                        ImageGuesses = data["guesses"];
+
+                        $scope.guesses = ImageGuesses[$scope.photos[0]["desc"]];
+
+                        $scope.$apply(); // update angular
+                    }
+                }// end of getlastphotoname succes func
+            });
+
             $scope.$apply();
         }
     });
@@ -295,7 +331,12 @@ trapApp.controller('photosController', function($scope) {
     $scope.photoIndex = 0;
 
     $scope.isActive = function (index) {
-        return $scope.photoIndex === index;
+        if ($scope.photoIndex==index){
+            $scope.guesses = ImageGuesses[$scope.photos[index]["desc"]];
+            return true;
+        }else{
+            return false;
+        }
     };
     // show prev image
     $scope.showPrev = function () {
