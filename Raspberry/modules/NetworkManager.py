@@ -1,7 +1,7 @@
 import threading
 import time
 import SocketInterface
-import os,sys
+import os, sys
 import GPRS_GSM
 import string
 import queue
@@ -23,7 +23,13 @@ class NetworkThread(threading.Thread):
         self.ip=ip
         self.port=port
         self.isInitialized = False # to initialize gsm modelu just one time
-        
+
+        self.doorCount=5
+        self.baitCount=10
+        self.closeDoorCome=0
+        self.openDoorCome=0
+        self.pullBaitCome=0
+        self.pushBaitCome=0
         self.cam = CameraService.Camera()
 
         self.comInt = SocketInterface.SocketInterface(self.ip,self.port)
@@ -75,20 +81,31 @@ class NetworkThread(threading.Thread):
                             cmd = int(cmd)
                             if cmd==Constants.REQ_OPEN_DOOR:
                                 print("OpenDoor")
+                                self.openDoorCome=1
                                 self.comInt.send2Socket(b'07')
+                                self.comInt.send2Socket(b'1')
                             elif cmd==Constants.REQ_CLOSE_DOOR:
                                 print("CloseDoor")
+                                self.closeDoorCome=1
                                 self.comInt.send2Socket(b'08')
+                                self.comInt.send2Socket(b'1')
                             elif cmd==Constants.REQ_PULL_BAIT:
                                 print("Pull Bait")
+                                self.pullBaitCome=1
                                 self.comInt.send2Socket(b'09')
+                                self.comInt.send2Socket(b'1')
                             elif cmd==Constants.REQ_PUSH_BAIT:
                                 print("Push Bait")
+                                self.pushBaitCome=1
                                 self.comInt.send2Socket(b'10')
+                                self.comInt.send2Socket(b'1')
                             elif cmd==Constants.REQ_TAKE_PHOTO:
                                 # take frame from camera and convert it
                                 # byte array to send over socket
+                                
                                 photoName = self.cam.getFrame()
+                                #photoName="2017-12-27_12.12.12.jpg"
+                                #photo = getPhotoByteArray(photoName)
                                 photo = getPhotoByteArray(photoName)
                                 print("PhotoSize:",len(photo))
                                 # first send photo code, name and photo

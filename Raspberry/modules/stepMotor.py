@@ -97,7 +97,7 @@ class MB11_stepper():
                 self.turnRight()
         print("Test done! Did you see movements?")
 
-def testStepMotor():
+def __moduleTest():
     stepMotor = MB11_stepper(gBottom=Constants.GPIO_PIN_STEP_1,
                             yBottom=Constants.GPIO_PIN_STEP_2,
                             gTop=Constants.GPIO_PIN_STEP_3,
@@ -105,5 +105,5 @@ def testStepMotor():
     stepMotor._test()
 
 if __name__=="__main__":
-    testStepMotor()
+    __moduleTest()
 
