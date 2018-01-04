@@ -126,13 +126,12 @@ trapApp.controller('trapDetailController', function($scope,$http) {
 
     loadTrapDetails($scope,currTrapSerial);
 
-    // TODO: change activeTrapSerial variable
     $scope.setDoor = function(nextState){
 
         sendData = {"serial":currTrapSerial, "nextState":nextState}
         
         $.ajax({
-            url: "takePhoto",
+            url: "setDoor",
             type: "POST",
             data: JSON.stringify(sendData),
             contentType: "application/json",
@@ -144,11 +143,34 @@ trapApp.controller('trapDetailController', function($scope,$http) {
                         alert("Door Closed.");
                     }else if(data["nextState"]==0){
                         alert("Door Opened.");
-                    }else{
-                        alert("Unknown door next state!");
                     }
                 }else{
                     alert("Door State Changing Error!");
+                }
+            }
+        });
+    };
+
+    $scope.setBait = function(nextState){
+
+        sendData = {"serial":currTrapSerial, "nextState":nextState}
+        
+        $.ajax({
+            url: "setBait",
+            type: "POST",
+            data: JSON.stringify(sendData),
+            contentType: "application/json",
+            // data has status variable
+            success: function(data,status){
+                retVal = assembleStatus(data["status"]);
+                if(retVal==true){
+                    if(data["nextState"]==1){
+                        alert("Bait pulled.");
+                    }else if(data["nextState"]==0){
+                        alert("Bait pushed.");
+                    }
+                }else{
+                    alert("Bait State Changing Error!");
                 }
             }
         });

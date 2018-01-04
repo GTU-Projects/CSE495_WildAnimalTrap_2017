@@ -7,6 +7,7 @@ import json
 import socket
 from datetime import datetime as date
 import YOLOHelper
+import Constants
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)-20s - %(levelname)-10s - %(threadName)-10s - %(message)s',
@@ -101,8 +102,16 @@ class TrapServiceThread(threading.Thread):
 
                         with open(jsonPath,"w") as f:
                             f.write(json.dumps(data))
-                            os.sync()
+                        os.sync()
+                        time.sleep(0.3)
                         print("client_thread: TrapServiceThread: run: photo saved.")
+                    elif buffer == b'09' or buffer==b'10': # req_pull_bait or req_push_bait
+                        stat = self.trapData.socket.recv(1)
+                        if stat == b'1':
+                            self.trapData.rQue.put(Constants.SUCCESS)
+                        else:
+                            self.trapData.rQue.put(Constants.ERROR_UNKNOWN)
+                    
                     continue
 
                 except socket.timeout: # if there is no new request from server
@@ -119,10 +128,6 @@ class TrapServiceThread(threading.Thread):
                         print("Send Req:",cmd)
                         # send command to trap/rpi
                         self.trapData.socket.sendall(cmd.encode())
-                elif buffer == "A":
-                    print("Trap Send Animal caught signal")
-                elif buffer.startswith('P-'):
-                    print("Trap Send Photo Byte array")
             except queue.Empty:
                 pass
             except Exception as e:
