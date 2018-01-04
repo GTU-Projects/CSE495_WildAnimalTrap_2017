@@ -5,8 +5,8 @@ import threading
 import queue
 import Constants
 import traceback
-from client_thread import TrapServiceThread 
-from client_thread import trapThreads
+from client_thread import TrapServiceThread, trapThreads
+
 
 logger = logging.getLogger("ConnectionHelper")
 logger.setLevel(logging.DEBUG)
@@ -96,8 +96,7 @@ class ServerConnHelperThread(threading.Thread):
             print("Message put on transmit queue")
 
             # now, wait and take response for taking photo request
-            resp  = trapThreads[str(serial)].rQue.get()
-            return resp
+            return trapThreads[str(serial)].rQue.get()
         except Exception as e:
             traceback.print_exc()
             print("**Exception: comHelper: sendReq2Trap",str(e))

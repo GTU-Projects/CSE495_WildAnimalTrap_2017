@@ -8,4 +8,4 @@ SERVER_PATH = os.path.dirname(PATH)
 PROJECT_DIR_PATH = os.path.dirname(SERVER_PATH)
 sys.path.insert(0,PROJECT_DIR_PATH+"/SharedData")
 
-print("DB__init__")
+print("DB_MODULE__init__")

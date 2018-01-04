@@ -2,10 +2,11 @@ import flask
 import flask_login
 import json
 import sys, os, glob
+import traceback
+
 
 from db import DBHelper
-#from modules import comHelper
-#from modules.client_thread import trapThreads
+from modules import comHelper
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 PROJECT_PATH = os.path.dirname(PATH)
@@ -128,27 +129,52 @@ def getTraps():
 @app.route("/setDoor",methods=["POST"])
 @flask_login.login_required
 def setDoor():
-    status = Constants.SUCCESS
+    status = Constants.ERROR_UNKNOWN
     nextState = Constants.ERROR_UNKNOWN
     try:
         req = flask.request.get_json()
         serial = req["serial"]
         cmd = req["nextState"]
+        print("main: serBait: serial:",serial,",cmd:",cmd)
 
-        # 1 opendoor
-        # 2 closedoor
-        # 3 take photo
-        """
-        trapThreads["serial"].trapData.tQue.push(str(cmd))
-
-        retVal = trapThreads["serial"].trapData.rQue.pop()
-
-        if retVal:
-            print("Door state changed")
+        resp = None
+        if cmd==1:
+            resp = socketThread.sendReq2Trap(serial,Constants.REQ_CLOSE_DOOR)
         else:
-            print("Door state change error")
-        """
-        nextState = cmd
+            resp = socketThread.sendReq2Trap(serial,Constants.REQ_OPEN_DOOR)
+       
+        if resp == Constants.SUCCESS:
+            status=Constants.SUCCESS
+            nextState=cmd
+
+    except Exception as e:
+        print("FlaskException: setDoor:",str(e))
+        status = Constants.ERROR_UNKNOWN
+        nextState = Constants.ERROR_UNKNOWN
+
+    print("NextStat:",nextState)
+    return flask.jsonify({"status":status,"nextState":nextState})
+
+@app.route("/setBait",methods=["POST"])
+@flask_login.login_required
+def setBait():
+    status = Constants.ERROR_UNKNOWN
+    nextState = Constants.ERROR_UNKNOWN
+    try:
+        req = flask.request.get_json()
+        serial = req["serial"]
+        cmd = req["nextState"]
+        print("main: serBait: serial:",serial,",cmd:",cmd)
+
+        resp = None
+        if cmd==1:
+            resp = socketThread.sendReq2Trap(serial,Constants.REQ_PULL_BAIT)
+        else:
+            resp = socketThread.sendReq2Trap(serial,Constants.REQ_PUSH_BAIT)
+       
+        if resp == Constants.SUCCESS:
+            status=Constants.SUCCESS
+            nextState=cmd
 
     except Exception as e:
         print("FlaskException: setDoor:",str(e))
@@ -167,13 +193,12 @@ def takePhoto():
         serial = req["serial"]
 
         retVal = socketThread.sendReq2Trap(serial,Constants.REQ_TAKE_PHOTO)
-        print("TakePhoto retVal:",retVal)
         if retVal == Constants.ERROR_CONNECTION:
             status = Constants.ERROR_CONNECTION
         else:
             status = Constants.SUCCESS
     except Exception as e:
-        print("main: takePhoto: exception:",str(e))
+        print("Exception: main: takePhoto:",str(e))
         status = Constants.ERROR_UNKNOWN
     return flask.jsonify({"status":status})
 
@@ -186,7 +211,8 @@ def getLastPhotoName():
 
         path = "./static/.trapData/"+str(serial)+"/"
         # get last created/touched file name
-        list_of_files = glob.glob(path+"*")
+        list_of_files = glob.glob(path+"*.jpg")
+        print(list_of_files)
         latest_file = max(list_of_files, key=os.path.getctime)
         latest_file = latest_file.replace(path,"")
         return flask.jsonify({"status":Constants.SUCCESS,"name":latest_file})
@@ -200,9 +226,7 @@ def getPhotoPaths():
     try:
         req = flask.request.get_json()
         serial = req["serial"]
-
-        fileList = os.listdir(trapDataDirPath+"/"+serial)
-        print(fileList)
+        fileList = [ f for f in os.listdir(trapDataDirPath+"/"+serial) if f.endswith(".jpg")]
         return flask.jsonify({"status":status,"paths":fileList})
     except Exception as e:
         status = Constants.ERROR_UNKNOWN
@@ -212,7 +236,6 @@ def getPhotoPaths():
 @flask_login.login_required
 def getTrapDetails():
     try:
-        print()
         req = flask.request.get_json()
         serial = req["serial"]
 
@@ -266,6 +289,23 @@ def addNewTrap():
 
     return flask.jsonify({"status":retVal})
 
+@app.route("/getImageGuesses",methods=["POST"])
+@flask_login.login_required
+def getImageGuesses():
+    try:
+        req = flask.request.get_json()
+        serial = req["serial"]
+
+        filePath = trapDataDirPath+"/"+serial+"/guesses.json"
+        res = {}
+        with open(filePath,"r") as f:
+            res = json.load(f)
+        return flask.jsonify({"status":Constants.SUCCESS,"guesses":res})
+    except Exception as e:
+        print("Exception: main: getImageGuesses:",str(e))
+        traceback.print_exc()
+        return flask.jsonify({"status":Constants.ERROR_UNKNOWN})
+
 # you can access active trap connections with
 # trap = socketThread.connections[ipAddress]
 # trap.socket, trap.thread ...
@@ -278,9 +318,9 @@ if __name__ == "__main__":
         # listen socket and create thread for each trap
         # all trap communication will be served over connection helper
         # TODO: remove comments
-        #socketThread = comHelper.ServerConnHelperThread(5669)
-        #socketThread.setDaemon(True)
-        #socketThread.start()
+        socketThread = comHelper.ServerConnHelperThread(5669)
+        socketThread.setDaemon(True)
+        socketThread.start()
 
         app.run(host="0.0.0.0", port=5000)
         
